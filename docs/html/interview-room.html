@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面试进行中 · 多模态模拟面试平台</title>
+<style>
+  :root {
+    --oracle-red: #C74634;
+    --oracle-red-dark: #A83A2B;
+    --oracle-red-light: #E85D4A;
+    --oracle-red-bg: #FBEEEC;
+    --gray-900: #1A1A1A;
+    --gray-800: #2D2D2D;
+    --gray-700: #404040;
+    --gray-600: #5C5C5C;
+    --gray-500: #767676;
+    --gray-400: #9E9E9E;
+    --gray-300: #C4C4C4;
+    --gray-200: #E8E8E8;
+    --gray-100: #F5F5F5;
+    --white: #FFFFFF;
+    --success: #388E3C;
+    --success-bg: #F0FAF0;
+    --success-border: #A5D6A7;
+    --font-serif: "SimSun", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+    --font-sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-mono: "SFMono-Regular", "Consolas", "Courier New", monospace;
+    --radius: 4px;
+    --transition: 0.2s ease;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+  ul { list-style: none; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+  input, select, textarea, button { font-family: var(--font-sans); }
+
+  .brand-accent-bar { height: 3px; background: var(--oracle-red); width: 100%; }
+
+  /* ───────────── Header ───────────── */
+  .room-header {
+    background: var(--gray-900);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .room-header-inner {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .back-link {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: var(--radius);
+    color: var(--gray-300);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--transition), color var(--transition);
+    border: none; background: transparent;
+  }
+  .back-link:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .back-link svg { width: 18px; height: 18px; }
+
+  .room-title-block { min-width: 0; }
+  .room-title { font-size: 15px; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .room-title-sub {
+    font-family: var(--font-sans); font-size: 11px; color: var(--gray-400);
+    display: flex; align-items: center; gap: 6px; margin-top: 1px;
+  }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(199,70,52,0.18); color: var(--oracle-red-light);
+    padding: 1px 8px; border-radius: 999px; font-size: 10.5px;
+  }
+  .live-pill .lp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--oracle-red-light); animation: pulse-red 1.8s infinite; }
+
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .status-chip {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-sans); font-size: 11.5px;
+    color: var(--gray-300);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-chip svg { width: 14px; height: 14px; }
+  .status-chip.net-good { color: #8FE39A; }
+  .status-chip.net-mid { color: #F0C674; }
+  .status-chip.net-poor { color: var(--oracle-red-light); }
+  .rec-chip .rec-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--oracle-red-light);
+    animation: pulse-red 1.4s infinite;
+  }
+
+  .icon-btn {
+    position: relative;
+    width: 32px; height: 32px;
+    border: none; background: transparent; color: var(--gray-300);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .icon-btn svg { width: 17px; height: 17px; }
+
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(232,93,74,0.55); }
+    70% { box-shadow: 0 0 0 5px rgba(232,93,74,0); }
+    100% { box-shadow: 0 0 0 0 rgba(232,93,74,0); }
+  }
+
+  /* ───────────── Mobile tab switcher ───────────── */
+  .mobile-tabs {
+    display: none;
+    position: sticky;
+    top: 58px;
+    z-index: 35;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 8px 14px;
+    gap: 8px;
+  }
+  .mobile-tabs button {
+    flex: 1;
+    padding: 8px 0;
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-600);
+    border-radius: 999px;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .mobile-tabs button.active { background: var(--gray-900); border-color: var(--gray-900); color: var(--white); }
+
+  /* ───────────── Shell layout ───────────── */
+  .room-shell {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+    display: grid;
+    grid-template-columns: 336px minmax(0,1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .panel-header {
+    padding: 14px 16px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-header h3 { font-size: 14px; font-weight: normal; color: var(--gray-900); letter-spacing: 0.02em; }
+  .panel-header .ph-sub { font-family: var(--font-sans); font-size: 11px; color: var(--gray-400); }
+
+  /* ═════════ LEFT: Scoring panel ═════════ */
+  .scoring-panel { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 78px; }
+
+  .scoring-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2px 2px 0;
+  }
+  .scoring-panel-header h2 { font-size: 16px; color: var(--gray-900); font-weight: normal; }
+  .collapse-btn {
+    font-family: var(--font-sans); font-size: 11.5px; color: var(--gray-500);
+    background: var(--white); border: 1px solid var(--gray-300); border-radius: 999px;
+    padding: 5px 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all var(--transition);
+  }
+  .collapse-btn:hover { border-color: var(--gray-500); color: var(--gray-800); }
+  .collapse-btn svg { width: 12px; height: 12px; transition: transform var(--transition); }
+  .scoring-panel.collapsed .collapse-btn svg { transform: rotate(180deg); }
+  .scoring-collapsible { display: flex; flex-direction: column; gap: 14px; }
+  .scoring-panel.collapsed .scoring-collapsible { display: none; }
+
+  /* overall score gauge */
+  .overall-card { padding: 20px 16px; display: flex; align-items: center; gap: 18px; }
+  .gauge-wrap { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+  .gauge-wrap svg { transform: rotate(-90deg); }
+  .gauge-track { fill: none; stroke: var(--gray-200); stroke-width: 8; }
+  .gauge-fill { fill: none; stroke: var(--oracle-red); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+  .gauge-value {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .gauge-value .gv-num { font-family: var(--font-sans); font-size: 24px; font-weight: 700; color: var(--gray-900); }
+  .gauge-value .gv-label { font-family: var(--font-sans); font-size: 10px; color: var(--gray-500); }
+  .overall-meta .om-title { font-size: 13.5px; color: var(--gray-700); margin-bottom: 4px; }
+  .om-trend { font-family: var(--font-sans); font-size: 11.5px; color: var(--success); display: flex; align-items: center; gap: 4px; }
+  .om-trend svg { width: 12px; height: 12px; }
+
+  /* dimension bars */
+  .dims-card { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 13px; }
+  .dim-row { }
+  .dim-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+  .dim-name { font-size: 12.5px; color: var(--gray-700); font-family: var(--font-sans); }
+  .dim-score { font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-900); font-weight: 600; }
+  .dim-track { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+  .dim-fill { height: 100%; background: var(--oracle-red); border-radius: 3px; transition: width 0.6s ease; }
+
+  /* AI feedback feed */
+  .feed-card { padding: 14px 16px 14px; }
+  .feed-list { max-height: 168px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding-right: 2px; }
+  .feed-item {
+    display: flex; gap: 8px;
+    font-family: var(--font-sans); font-size: 12px; color: var(--gray-700);
+    padding: 8px 10px; background: var(--gray-100); border-radius: var(--radius);
+    line-height: 1.5;
+    animation: feed-in 0.35s ease;
+  }
+  @keyframes feed-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .feed-item .fi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--oracle-red); flex-shrink: 0; margin-top: 5px; }
+  .feed-item .fi-time { color: var(--gray-400); font-size: 10.5px; margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+
+  /* comment box */
+  .comment-card { padding: 14px 16px 16px; }
+  .comment-card textarea {
+    width: 100%; min-height: 74px; resize: vertical;
+    border: 1px solid var(--gray-300); border-radius: var(--radius);
+    padding: 9px 10px; font-size: 12.5px; color: var(--gray-800);
+    outline: none; margin-top: 8px; transition: border-color var(--transition);
+  }
+  .comment-card textarea:focus { border-color: var(--oracle-red); box-shadow: 0 0 0 3px rgba(199,70,52,0.12); }
+  .comment-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .comment-footer .cf-count { font-family: var(--font-sans); font-size: 11px; color: var(--gray-400); }
+  .btn-save-comment {
+    font-family: var(--font-sans); font-size: 12px; color: var(--white);
+    background: var(--oracle-red); border: none; border-radius: var(--radius);
+    padding: 7px 16px; cursor: pointer; transition: background var(--transition);
+  }
+  .btn-save-comment:hover { background: var(--oracle-red-dark); }
+
+  /* history */
+  .history-card { padding: 14px 16px 8px; }
+  .history-list { margin-top: 6px; display: flex; flex-direction: column; }
+  .history-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 2px; border-bottom: 1px solid var(--gray-100);
+    font-family: var(--font-sans);
+  }
+  .history-row:last-child { border-bottom: none; }
+  .hr-q { flex: 1; min-width: 0; font-size: 12px; color: var(--gray-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hr-time { font-size: 10.5px; color: var(--gray-400); flex-shrink: 0; }
+  .hr-score {
+    flex-shrink: 0; font-size: 11.5px; font-weight: 700; color: var(--white);
+    background: var(--gray-800); border-radius: 999px; padding: 2px 9px;
+  }
+  .history-empty { font-family: var(--font-sans); font-size: 12px; color: var(--gray-400); padding: 10px 2px 14px; text-align: center; }
+
+  /* ═════════ RIGHT: Interview main ═════════ */
+  .interview-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  .meta-bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 14px 18px;
+  }
+  .round-tag {
+    font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-700);
+    background: var(--gray-100); padding: 6px 12px; border-radius: var(--radius);
+    white-space: nowrap;
+  }
+  .round-tag strong { color: var(--gray-900); }
+  .diff-chip {
+    font-family: var(--font-sans); font-size: 11.5px; color: var(--gray-600);
+    border: 1px solid var(--gray-300); padding: 5px 11px; border-radius: 999px;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .diff-chip .diff-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--oracle-red); }
+  .type-chip {
+    font-family: var(--font-sans); font-size: 11.5px; color: var(--gray-600);
+    background: var(--gray-100); padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  }
+
+  .timer-block {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 22px; font-weight: 600;
+    color: var(--gray-900);
+    padding: 4px 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--gray-100);
+  }
+  .timer-block.low { color: var(--oracle-red); border-color: #F0C9C2; background: var(--oracle-red-bg); }
+  .timer-block svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .qnav { display: flex; gap: 8px; }
+  .qnav button {
+    font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-700);
+    background: var(--white); border: 1px solid var(--gray-300); border-radius: var(--radius);
+    padding: 7px 13px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .qnav button:hover:not(:disabled) { border-color: var(--gray-500); background: var(--gray-100); }
+  .qnav button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .qnav svg { width: 13px; height: 13px; }
+
+  /* video stage */
+  .video-stage {
+    position: relative;
+    background: linear-gradient(155deg, #23232A 0%, var(--gray-900) 70%);
+    border-radius: var(--radius);
+    aspect-ratio: 16/8.2;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--gray-800);
+  }
+  .video-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 34px 34px;
+    pointer-events: none;
+  }
+  .video-placeholder { text-align: center; color: var(--gray-500); position: relative; z-index: 1; }
+  .video-placeholder svg { width: 52px; height: 52px; margin-bottom: 10px; opacity: 0.7; }
+  .video-placeholder p { font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-400); }
+
+  .rec-badge {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+    padding: 5px 10px; border-radius: 999px;
+    font-family: var(--font-sans); font-size: 11px; color: var(--white);
+  }
+  .rec-badge .rb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--oracle-red-light); animation: pulse-red 1.4s infinite; }
+
+  .name-tag {
+    position: absolute; bottom: 12px; left: 12px; z-index: 2;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+    padding: 6px 12px; border-radius: var(--radius);
+    font-family: var(--font-sans); font-size: 12px; color: var(--white);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .name-tag .mic-dot { width: 6px; height: 6px; border-radius: 50%; background: #6FCF73; }
+  .name-tag.muted .mic-dot { background: var(--gray-400); }
+
+  .pip-box {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    width: 108px; height: 76px;
+    background: var(--gray-800);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+  }
+  .pip-box svg { width: 24px; height: 24px; color: var(--gray-400); }
+  .pip-box span { font-family: var(--font-sans); font-size: 10px; color: var(--gray-400); }
+
+  .video-controls {
+    position: absolute; bottom: 12px; right: 12px; z-index: 2;
+    display: flex; gap: 8px;
+  }
+  .vc-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: none; color: var(--white); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+  }
+  .vc-btn:hover { background: rgba(255,255,255,0.22); }
+  .vc-btn.off { background: var(--oracle-red); }
+  .vc-btn svg { width: 16px; height: 16px; }
+
+  /* question card */
+  .question-card { padding: 18px 20px; }
+  .qc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .qc-index { font-family: var(--font-sans); font-size: 11px; color: var(--gray-400); }
+  .qc-text { font-size: 16px; color: var(--gray-900); line-height: 1.7; }
+
+  /* control bar */
+  .control-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; gap: 12px; flex-wrap: wrap;
+  }
+  .control-left { display: flex; gap: 10px; }
+  .ctl-btn {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-700);
+    background: var(--white); border: 1px solid var(--gray-300); border-radius: var(--radius);
+    padding: 9px 14px; cursor: pointer; transition: all var(--transition); white-space: nowrap;
+  }
+  .ctl-btn:hover { border-color: var(--gray-500); background: var(--gray-100); }
+  .ctl-btn svg { width: 15px; height: 15px; }
+  .ctl-btn.active-off { background: var(--oracle-red-bg); border-color: #F0C9C2; color: var(--oracle-red-dark); }
+
+  .btn-end {
+    font-family: var(--font-sans); font-size: 13px; color: var(--white);
+    background: var(--oracle-red); border: none; border-radius: var(--radius);
+    padding: 10px 20px; cursor: pointer; transition: background var(--transition);
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+  }
+  .btn-end:hover { background: var(--oracle-red-dark); }
+  .btn-end svg { width: 15px; height: 15px; }
+
+  /* quick links row */
+  .quick-links-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ql-btn {
+    flex: 1; min-width: 160px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 14px;
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .ql-btn:hover { border-color: var(--gray-300); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .ql-icon {
+    width: 34px; height: 34px; border-radius: var(--radius); background: var(--gray-100);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gray-600);
+  }
+  .ql-icon svg { width: 17px; height: 17px; }
+  .ql-text .qlt { font-size: 13px; color: var(--gray-900); }
+  .ql-text .qls { font-family: var(--font-sans); font-size: 10.5px; color: var(--gray-500); margin-top: 1px; }
+
+  /* ───────────── Modal ───────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,26,26,0.5);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white); width: 100%; max-width: 420px; border-radius: var(--radius);
+    padding: 26px 26px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-box h3 { font-size: 17px; color: var(--gray-900); margin-bottom: 8px; font-weight: normal; }
+  .modal-box p.modal-sub { font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-500); line-height: 1.6; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-secondary {
+    flex: 1; height: 42px; background: var(--white); color: var(--gray-700);
+    border: 1px solid var(--gray-300); border-radius: var(--radius);
+    font-family: var(--font-serif); font-size: 14px; cursor: pointer; transition: background var(--transition);
+  }
+  .btn-secondary:hover { background: var(--gray-100); }
+  .btn-danger-modal {
+    flex: 1.3; height: 42px; background: var(--oracle-red); color: var(--white);
+    border: none; border-radius: var(--radius);
+    font-family: var(--font-serif); font-size: 14px; cursor: pointer; transition: background var(--transition);
+  }
+  .btn-danger-modal:hover { background: var(--oracle-red-dark); }
+
+  /* report preview modal specifics */
+  .report-preview-grid { display: flex; gap: 14px; margin-bottom: 18px; }
+  .rp-gauge { width: 74px; height: 74px; flex-shrink: 0; position: relative; }
+  .rp-gauge svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .rp-dims { flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  .rp-dim-row { display: flex; align-items: center; gap: 8px; }
+  .rp-dim-row span:first-child { font-family: var(--font-sans); font-size: 11px; color: var(--gray-600); width: 56px; flex-shrink: 0; }
+  .rp-dim-track { flex: 1; height: 5px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+  .rp-dim-fill { height: 100%; background: var(--oracle-red); border-radius: 3px; }
+  .rp-dim-row span:last-child { font-family: var(--font-sans); font-size: 11px; color: var(--gray-700); width: 24px; text-align: right; flex-shrink: 0; }
+
+  /* ───────────── Toast ───────────── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--gray-900); color: var(--white);
+    padding: 13px 18px; border-radius: var(--radius);
+    font-family: var(--font-sans); font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transform: translateY(20px); opacity: 0; pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 200; border-left: 3px solid var(--oracle-red);
+    max-width: calc(100vw - 48px);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast svg { width: 16px; height: 16px; color: #6FCF73; flex-shrink: 0; }
+
+  /* ───────────── Responsive ───────────── */
+  @media (max-width: 1080px) {
+    .room-shell { grid-template-columns: 1fr; max-width: 760px; }
+    .scoring-panel { position: static; }
+  }
+
+  @media (max-width: 720px) {
+    .mobile-tabs { display: flex; }
+    .room-shell {
+      display: block;
+      padding: 14px 14px 60px;
+      scroll-snap-type: y proximity;
+    }
+    .interview-main, .scoring-panel {
+      scroll-snap-align: start;
+      margin-bottom: 16px;
+    }
+    .room-title-sub .live-pill span.lp-txt { display: none; }
+    .meta-bar { padding: 12px 14px; }
+    .timer-block { font-size: 18px; }
+    .video-stage { aspect-ratio: 4/3.4; }
+    .quick-links-row { flex-direction: column; }
+    .ql-btn { min-width: 0; }
+    .control-bar { flex-direction: column; align-items: stretch; }
+    .control-left { flex-wrap: wrap; }
+    .btn-end { justify-content: center; }
+    .report-preview-grid { flex-direction: column; align-items: center; text-align: center; }
+    .rp-dims { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="brand-accent-bar"></div>
+
+<!-- ───────────── Header ───────────── -->
+<header class="room-header">
+  <div class="room-header-inner">
+    <button class="back-link" id="backBtn" aria-label="返回大厅">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="room-title-block">
+      <div class="room-title">React 组件设计深挖</div>
+      <div class="room-title-sub">
+        <span class="live-pill"><span class="lp-dot"></span><span class="lp-txt">进行中</span></span>
+        <span>前端开发 · 中级 · AI 对练</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-chip net-good" id="netChip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+        网络良好
+      </div>
+      <div class="status-chip rec-chip">
+        <span class="rec-dot"></span>
+        <span id="recDuration">录制 00:00</span>
+      </div>
+      <button class="icon-btn" id="helpBtn" aria-label="帮助中心">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2 1.7-2 3.2"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor" stroke="none"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile tab switcher -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="active" data-target="interviewMain">面试区</button>
+  <button data-target="scoringPanel">评分面板</button>
+</div>
+
+<!-- ───────────── Main Shell ───────────── -->
+<div class="room-shell">
+
+  <!-- LEFT: Scoring panel -->
+  <aside class="scoring-panel" id="scoringPanel">
+    <div class="scoring-panel-header">
+      <h2>面试官评分面板</h2>
+      <button class="collapse-btn" id="collapseBtn">
+        收起
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div class="scoring-collapsible" id="scoringCollapsible">
+      <div class="panel overall-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="42"></circle>
+            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+          </svg>
+          <div class="gauge-value"><span class="gv-num" id="gaugeNum">0</span><span class="gv-label">综合评分</span></div>
+        </div>
+        <div class="overall-meta">
+          <div class="om-title">AI 实时综合评估</div>
+          <div class="om-trend">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 15l6-6 4 4 6-8"/></svg>
+            表现平稳，较上题略有提升
+          </div>
+        </div>
+      </div>
+
+      <div class="panel dims-card">
+        <div class="dim-row">
+          <div class="dim-top"><span class="dim-name">表达能力</span><span class="dim-score" id="dimScore-express">0</span></div>
+          <div class="dim-track"><div class="dim-fill" id="dimFill-express" style="width:0%"></div></div>
+        </div>
+        <div class="dim-row">
+          <div class="dim-top"><span class="dim-name">逻辑思维</span><span class="dim-score" id="dimScore-logic">0</span></div>
+          <div class="dim-track"><div class="dim-fill" id="dimFill-logic" style="width:0%"></div></div>
+        </div>
+        <div class="dim-row">
+          <div class="dim-top"><span class="dim-name">专业能力</span><span class="dim-score" id="dimScore-pro">0</span></div>
+          <div class="dim-track"><div class="dim-fill" id="dimFill-pro" style="width:0%"></div></div>
+        </div>
+        <div class="dim-row">
+          <div class="dim-top"><span class="dim-name">应变能力</span><span class="dim-score" id="dimScore-adapt">0</span></div>
+          <div class="dim-track"><div class="dim-fill" id="dimFill-adapt" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="panel feed-card">
+        <div class="panel-header" style="padding:0;"><h3>AI 实时反馈</h3><span class="ph-sub">自动更新</span></div>
+        <div class="feed-list" id="feedList"></div>
+      </div>
+
+      <div class="panel comment-card">
+        <div class="panel-header" style="padding:0;"><h3>评委评语</h3></div>
+        <textarea id="commentInput" maxlength="200" placeholder="请输入对本题作答的评价…"></textarea>
+        <div class="comment-footer">
+          <span class="cf-count"><span id="commentCount">0</span>/200</span>
+          <button class="btn-save-comment" id="saveCommentBtn">保存评语</button>
+        </div>
+      </div>
+
+      <div class="panel history-card">
+        <div class="panel-header" style="padding:0;"><h3>评分历史记录</h3><span class="ph-sub" id="historyCount">0 题已完成</span></div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty" id="historyEmpty">切换到下一题后将记录本题得分</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: Interview main -->
+  <section class="interview-main" id="interviewMain">
+    <div class="panel meta-bar">
+      <span class="round-tag">第 <strong id="qIndexNow">1</strong> / <span id="qIndexTotal">6</span> 题</span>
+      <span class="diff-chip"><span class="diff-dot"></span><span id="qDifficulty">中级</span></span>
+      <span class="type-chip" id="qType">概念题</span>
+      <div class="timer-block" id="timerBlock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <span id="timerDisplay">03:00</span>
+      </div>
+    </div>
+
+    <div class="video-stage">
+      <span class="rec-badge"><span class="rb-dot"></span>REC</span>
+      <div class="pip-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="M21 8l-4 2.5V13.5L21 16z"/></svg>
+        <span>AI 考官</span>
+      </div>
+      <div class="video-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        <p>摄像头画面（候选人）</p>
+      </div>
+      <span class="name-tag" id="nameTag"><span class="mic-dot"></span>陈明远</span>
+      <div class="video-controls">
+        <button class="vc-btn" id="micBtn" aria-label="静音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a7 7 0 01-14 0M12 18v3"/></svg></button>
+        <button class="vc-btn" id="camBtn" aria-label="关闭摄像头"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
+      </div>
+    </div>
+
+    <div class="panel question-card">
+      <div class="qc-top">
+        <span class="qc-index" id="qcIndexLabel">题目 1</span>
+      </div>
+      <div class="qc-text" id="qcText">请谈谈你对 React Hooks 设计理念的理解，以及它解决了 class 组件的哪些痛点。</div>
+    </div>
+
+    <div class="panel control-bar">
+      <div class="control-left">
+        <button class="ctl-btn" id="prevBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          上一题
+        </button>
+        <button class="ctl-btn" id="nextBtn">
+          下一题
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <button class="btn-end" id="endBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        结束面试
+      </button>
+    </div>
+
+    <div class="quick-links-row">
+      <div class="ql-btn" id="replayBtn">
+        <div class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+        <div class="ql-text"><div class="qlt">面试回放入口</div><div class="qls">查看历史片段与录像</div></div>
+      </div>
+      <div class="ql-btn" id="reportPreviewBtn">
+        <div class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><path d="M9 15l10-10 4 4-10 10H9v-4z"/></svg></div>
+        <div class="ql-text"><div class="qlt">成绩报告预览</div><div class="qls">实时查看当前评估摘要</div></div>
+      </div>
+      <div class="ql-btn" id="helpCenterBtn">
+        <div class="ql-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2 1.7-2 3.2"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor" stroke="none"/></svg></div>
+        <div class="ql-text"><div class="qlt">帮助中心</div><div class="qls">新手指南与常见问题</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ───────────── End Interview Modal ───────────── -->
+<div class="modal-overlay" id="endModal">
+  <div class="modal-box">
+    <h3>确认结束本场面试？</h3>
+    <p class="modal-sub">结束后本场面试将无法恢复，系统将根据已完成的题目表现生成完整成绩报告。</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelEndBtn">取消</button>
+      <button class="btn-danger-modal" id="confirmEndBtn">确认结束</button>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────── Report Preview Modal ───────────── -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-box">
+    <h3>成绩报告预览</h3>
+    <p class="modal-sub" style="margin-bottom:14px;">基于目前已完成题目的实时评估摘要</p>
+    <div class="report-preview-grid">
+      <div class="rp-gauge">
+        <svg viewBox="0 0 100 100">
+          <circle class="gauge-track" cx="50" cy="50" r="42"></circle>
+          <circle class="gauge-fill" id="rpGaugeFill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+        </svg>
+        <div class="gauge-value"><span class="gv-num" id="rpGaugeNum" style="font-size:20px;">0</span><span class="gv-label">综合分</span></div>
+      </div>
+      <div class="rp-dims" id="rpDims"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="closeReportBtn">关闭</button>
+      <button class="btn-danger-modal" id="fullReportBtn">查看完整报告</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">操作成功</span>
+</div>
+
+<script>
+(function () {
+  var questions = [
+    { text: "请谈谈你对 React Hooks 设计理念的理解，以及它解决了 class 组件的哪些痛点。", difficulty: "中级", type: "概念题" },
+    { text: "实现一个防抖函数（debounce），并说明它的典型使用场景。", difficulty: "中级", type: "代码题" },
+    { text: "面对一个包含上万条数据的长列表，你会如何优化它的渲染性能？", difficulty: "高级", type: "场景题" },
+    { text: "请介绍一次你主导过的性能优化项目，包括发现问题、定位瓶颈和最终收益。", difficulty: "中级", type: "项目经验" },
+    { text: "什么是虚拟 DOM？它是否一定比直接操作真实 DOM 更快？为什么？", difficulty: "高级", type: "概念题" },
+    { text: "白板 coding：给定一个单链表，写出反转该链表的函数。", difficulty: "高级", type: "算法题" }
+  ];
+
+  var feedPool = [
+    "语速适中，表达清晰",
+    "建议在回答中加入具体量化数据",
+    "逻辑结构完整，可以再精炼一些",
+    "技术术语使用准确",
+    "遇到追问时应对得当",
+    "可以尝试用 STAR 法则组织回答",
+    "对边界情况的考虑比较全面",
+    "回答略显冗长，建议先给结论再展开"
+  ];
+
+  var dims = { express: 62, logic: 58, pro: 65, adapt: 60 };
+  var dimEls = {
+    express: { score: document.getElementById("dimScore-express"), fill: document.getElementById("dimFill-express") },
+    logic: { score: document.getElementById("dimScore-logic"), fill: document.getElementById("dimFill-logic") },
+    pro: { score: document.getElementById("dimScore-pro"), fill: document.getElementById("dimFill-pro") },
+    adapt: { score: document.getElementById("dimScore-adapt"), fill: document.getElementById("dimFill-adapt") }
+  };
+
+  var gaugeFill = document.getElementById("gaugeFill");
+  var gaugeNum = document.getElementById("gaugeNum");
+  var CIRC = 264;
+
+  function overallScore() {
+    var sum = dims.express + dims.logic + dims.pro + dims.adapt;
+    return Math.round(sum / 4);
+  }
+
+  function renderDims(animate) {
+    Object.keys(dims).forEach(function (k) {
+      var v = Math.max(0, Math.min(100, Math.round(dims[k])));
+      dimEls[k].score.textContent = v;
+      dimEls[k].fill.style.width = v + "%";
+    });
+    var overall = overallScore();
+    gaugeNum.textContent = overall;
+    var offset = CIRC - (CIRC * overall / 100);
+    gaugeFill.style.strokeDashoffset = offset;
+  }
+
+  function nudgeDims() {
+    Object.keys(dims).forEach(function (k) {
+      var delta = (Math.random() * 6) - 2.5;
+      dims[k] = Math.max(45, Math.min(97, dims[k] + delta));
+    });
+    renderDims(true);
+  }
+
+  // initial animate-in
+  setTimeout(function () { renderDims(true); }, 200);
+  var scoreTimer = setInterval(nudgeDims, 3200);
+
+  // AI feedback feed
+  var feedList = document.getElementById("feedList");
+  function addFeedItem() {
+    var msg = feedPool[Math.floor(Math.random() * feedPool.length)];
+    var now = new Date();
+    var hh = String(now.getHours()).padStart(2, "0");
+    var mm = String(now.getMinutes()).padStart(2, "0");
+    var item = document.createElement("div");
+    item.className = "feed-item";
+    item.innerHTML = '<span class="fi-dot"></span><span>' + msg + '</span><span class="fi-time">' + hh + ":" + mm + '</span>';
+    feedList.appendChild(item);
+    feedList.scrollTop = feedList.scrollHeight;
+    while (feedList.children.length > 20) feedList.removeChild(feedList.firstChild);
+  }
+  addFeedItem();
+  var feedTimer = setInterval(addFeedItem, 6000);
+
+  // comment box
+  var commentInput = document.getElementById("commentInput");
+  var commentCount = document.getElementById("commentCount");
+  commentInput.addEventListener("input", function () { commentCount.textContent = commentInput.value.length; });
+  document.getElementById("saveCommentBtn").addEventListener("click", function () {
+    showToast(commentInput.value.trim() ? "评语已保存" : "请先输入评语内容");
+  });
+
+  // collapse toggle
+  var scoringPanel = document.getElementById("scoringPanel");
+  document.getElementById("collapseBtn").addEventListener("click", function (e) {
+    scoringPanel.classList.toggle("collapsed");
+    e.currentTarget.firstChild.textContent = scoringPanel.classList.contains("collapsed") ? "展开 " : "收起 ";
+  });
+
+  // question navigation + timer
+  var qIndex = 0;
+  var QUESTION_SECONDS = 180;
+  var remaining = QUESTION_SECONDS;
+  var timerInterval = null;
+  var history = [];
+
+  var qIndexNow = document.getElementById("qIndexNow");
+  var qIndexTotal = document.getElementById("qIndexTotal");
+  var qDifficulty = document.getElementById("qDifficulty");
+  var qType = document.getElementById("qType");
+  var qcIndexLabel = document.getElementById("qcIndexLabel");
+  var qcText = document.getElementById("qcText");
+  var timerDisplay = document.getElementById("timerDisplay");
+  var timerBlock = document.getElementById("timerBlock");
+  var prevBtn = document.getElementById("prevBtn");
+  var nextBtn = document.getElementById("nextBtn");
+
+  qIndexTotal.textContent = questions.length;
+
+  function renderQuestion() {
+    var q = questions[qIndex];
+    qIndexNow.textContent = qIndex + 1;
+    qDifficulty.textContent = q.difficulty;
+    qType.textContent = q.type;
+    qcIndexLabel.textContent = "题目 " + (qIndex + 1);
+    qcText.textContent = q.text;
+    prevBtn.disabled = qIndex === 0;
+    nextBtn.innerHTML = qIndex === questions.length - 1
+      ? '结束并生成报告 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+      : '下一题 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>';
+  }
+
+  function renderTimer() {
+    var m = String(Math.floor(remaining / 60)).padStart(2, "0");
+    var s = String(remaining % 60).padStart(2, "0");
+    timerDisplay.textContent = m + ":" + s;
+    timerBlock.classList.toggle("low", remaining <= 30);
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    remaining = QUESTION_SECONDS;
+    renderTimer();
+    timerInterval = setInterval(function () {
+      remaining--;
+      if (remaining <= 0) {
+        remaining = 0;
+        renderTimer();
+        clearInterval(timerInterval);
+        showToast("本题时间已到，可切换下一题");
+        return;
+      }
+      renderTimer();
+    }, 1000);
+  }
+
+  var historyList = document.getElementById("historyList");
+  var historyEmpty = document.getElementById("historyEmpty");
+  var historyCount = document.getElementById("historyCount");
+
+  function pushHistory(question, score) {
+    if (historyEmpty) { historyEmpty.remove(); historyEmpty = null; }
+    var now = new Date();
+    var hh = String(now.getHours()).padStart(2, "0");
+    var mm = String(now.getMinutes()).padStart(2, "0");
+    var row = document.createElement("div");
+    row.className = "history-row";
+    row.innerHTML =
+      '<span class="hr-q">' + question + '</span>' +
+      '<span class="hr-time">' + hh + ":" + mm + '</span>' +
+      '<span class="hr-score">' + score + '</span>';
+    historyList.insertBefore(row, historyList.firstChild);
+    history.push({ question: question, score: score });
+    historyCount.textContent = history.length + " 题已完成";
+  }
+
+  function goNext() {
+    pushHistory(questions[qIndex].text.slice(0, 16) + "…", overallScore());
+    if (qIndex === questions.length - 1) {
+      openModal("endModal");
+      return;
+    }
+    qIndex++;
+    renderQuestion();
+    startTimer();
+    showToast("已切换到第 " + (qIndex + 1) + " 题");
+  }
+  function goPrev() {
+    if (qIndex === 0) return;
+    qIndex--;
+    renderQuestion();
+    startTimer();
+    showToast("已返回第 " + (qIndex + 1) + " 题");
+  }
+  nextBtn.addEventListener("click", goNext);
+  prevBtn.addEventListener("click", goPrev);
+
+  renderQuestion();
+  startTimer();
+
+  // mic / camera toggles
+  var nameTag = document.getElementById("nameTag");
+  var micBtn = document.getElementById("micBtn");
+  var camBtn = document.getElementById("camBtn");
+  micBtn.addEventListener("click", function () {
+    var muted = nameTag.classList.toggle("muted");
+    micBtn.classList.toggle("off", muted);
+    showToast(muted ? "麦克风已静音" : "麦克风已开启");
+  });
+  camBtn.addEventListener("click", function () {
+    var off = camBtn.classList.toggle("off");
+    showToast(off ? "摄像头已关闭" : "摄像头已开启");
+  });
+
+  // recording duration
+  var recSeconds = 0;
+  var recDurationEl = document.getElementById("recDuration");
+  setInterval(function () {
+    recSeconds++;
+    var m = String(Math.floor(recSeconds / 60)).padStart(2, "0");
+    var s = String(recSeconds % 60).padStart(2, "0");
+    recDurationEl.textContent = "录制 " + m + ":" + s;
+  }, 1000);
+
+  // network status fluctuation
+  var netChip = document.getElementById("netChip");
+  var netStates = [
+    { cls: "net-good", label: "网络良好" },
+    { cls: "net-mid", label: "网络一般" },
+    { cls: "net-good", label: "网络良好" }
+  ];
+  setInterval(function () {
+    var s = netStates[Math.floor(Math.random() * netStates.length)];
+    netChip.className = "status-chip " + s.cls;
+    netChip.lastChild.textContent = s.label;
+  }, 9000);
+
+  // toast
+  var toast = document.getElementById("toast");
+  var toastMsg = document.getElementById("toastMsg");
+  var toastTimer = null;
+  function showToast(msg) {
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2400);
+  }
+
+  // modal helpers
+  function openModal(id) { document.getElementById(id).classList.add("open"); }
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+  document.querySelectorAll(".modal-overlay").forEach(function (m) {
+    m.addEventListener("click", function (e) { if (e.target === m) m.classList.remove("open"); });
+  });
+
+  // end interview modal
+  document.getElementById("endBtn").addEventListener("click", function () { openModal("endModal"); });
+  document.getElementById("cancelEndBtn").addEventListener("click", function () { closeModal("endModal"); });
+  document.getElementById("confirmEndBtn").addEventListener("click", function () {
+    closeModal("endModal");
+    clearInterval(timerInterval);
+    clearInterval(scoreTimer);
+    clearInterval(feedTimer);
+    showToast("面试已结束，正在生成成绩报告…");
+  });
+
+  // report preview modal
+  var rpGaugeFill = document.getElementById("rpGaugeFill");
+  var rpGaugeNum = document.getElementById("rpGaugeNum");
+  var rpDims = document.getElementById("rpDims");
+  var dimLabels = { express: "表达能力", logic: "逻辑思维", pro: "专业能力", adapt: "应变能力" };
+
+  document.getElementById("reportPreviewBtn").addEventListener("click", function () {
+    var overall = overallScore();
+    rpGaugeNum.textContent = overall;
+    rpGaugeFill.style.strokeDashoffset = CIRC - (CIRC * overall / 100);
+    rpDims.innerHTML = "";
+    Object.keys(dims).forEach(function (k) {
+      var v = Math.round(dims[k]);
+      var row = document.createElement("div");
+      row.className = "rp-dim-row";
+      row.innerHTML = "<span>" + dimLabels[k] + "</span><div class='rp-dim-track'><div class='rp-dim-fill' style='width:" + v + "%'></div></div><span>" + v + "</span>";
+      rpDims.appendChild(row);
+    });
+    openModal("reportModal");
+  });
+  document.getElementById("closeReportBtn").addEventListener("click", function () { closeModal("reportModal"); });
+  document.getElementById("fullReportBtn").addEventListener("click", function () {
+    showToast("正在打开完整成绩报告…");
+    closeModal("reportModal");
+  });
+
+  // quick links
+  document.getElementById("replayBtn").addEventListener("click", function () { showToast("正在打开本场面试回放"); });
+  document.getElementById("helpCenterBtn").addEventListener("click", function () { showToast("帮助中心：查看新手指南与常见问题"); });
+  document.getElementById("helpBtn").addEventListener("click", function () { showToast("帮助中心：查看新手指南与常见问题"); });
+  document.getElementById("backBtn").addEventListener("click", function () { showToast("正在返回面试大厅…"); });
+
+  // mobile tab switcher
+  var mobileTabs = document.getElementById("mobileTabs");
+  if (mobileTabs) {
+    mobileTabs.querySelectorAll("button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        mobileTabs.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        var target = document.getElementById(btn.getAttribute("data-target"));
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

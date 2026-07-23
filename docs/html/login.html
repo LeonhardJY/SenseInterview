@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 · 多模态模拟面试平台</title>
+  <style>
+    :root {
+      --oracle-red: #C74634;
+      --oracle-red-dark: #A83A2B;
+      --oracle-red-light: #E85D4A;
+      --gray-900: #1A1A1A;
+      --gray-800: #2D2D2D;
+      --gray-700: #404040;
+      --gray-600: #5C5C5C;
+      --gray-500: #767676;
+      --gray-400: #9E9E9E;
+      --gray-300: #C4C4C4;
+      --gray-200: #E8E8E8;
+      --gray-100: #F5F5F5;
+      --white: #FFFFFF;
+      --error: #D32F2F;
+      --error-bg: #FEF2F2;
+      --error-border: #EF9A9A;
+      --font-serif: "SimSun", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+      --font-sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --radius: 4px;
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--gray-800);
+      background: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .page {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Brand Panel (Left) ── */
+    .brand-panel {
+      flex: 0 0 44%;
+      max-width: 560px;
+      background: var(--gray-900);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--oracle-red);
+    }
+
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+      bottom: -120px;
+      right: -80px;
+      width: 320px;
+      height: 320px;
+      border: 1px solid rgba(199, 70, 52, 0.15);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .brand-logo-mark {
+      width: 40px;
+      height: 40px;
+      background: var(--oracle-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+
+    .brand-logo-mark svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--white);
+    }
+
+    .brand-logo-text {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--gray-400);
+      font-family: var(--font-sans);
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: normal;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+
+    .brand-tagline {
+      font-size: 16px;
+      color: var(--gray-400);
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .brand-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .brand-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 14px;
+      color: var(--gray-300);
+      line-height: 1.55;
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(199, 70, 52, 0.4);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--oracle-red-light);
+      font-size: 13px;
+      margin-top: 1px;
+    }
+
+    .feature-text strong {
+      display: block;
+      color: var(--white);
+      font-weight: normal;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* ── Form Panel (Right) ── */
+    .form-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      background: var(--gray-100);
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      background: var(--white);
+      padding: 48px 40px;
+      border: 1px solid var(--gray-200);
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-header {
+      margin-bottom: 36px;
+    }
+
+    .form-header h2 {
+      font-size: 22px;
+      font-weight: normal;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--gray-500);
+      font-family: var(--font-sans);
+    }
+
+    /* Form elements */
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--gray-900);
+      background: var(--white);
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    input::placeholder {
+      color: var(--gray-400);
+    }
+
+    input:focus {
+      border-color: var(--oracle-red);
+      box-shadow: 0 0 0 3px rgba(199, 70, 52, 0.12);
+    }
+
+    input.error {
+      border-color: var(--error);
+      background: var(--error-bg);
+    }
+
+    input.error:focus {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+    }
+
+    .field-error {
+      display: none;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .form-alert {
+      display: none;
+      padding: 12px 14px;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-left: 3px solid var(--error);
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--error);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .form-alert.visible {
+      display: block;
+    }
+
+    /* Password toggle */
+    .password-wrapper input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 44px;
+      width: 44px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      transition: color var(--transition);
+    }
+
+    .toggle-password:hover {
+      color: var(--gray-800);
+    }
+
+    .toggle-password:focus-visible {
+      outline: 2px solid var(--oracle-red);
+      outline-offset: -2px;
+    }
+
+    .toggle-password svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Remember & Forgot row */
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--gray-600);
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--oracle-red);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--oracle-red);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .forgot-link:hover {
+      color: var(--oracle-red-dark);
+      text-decoration: underline;
+    }
+
+    .forgot-link:focus-visible {
+      outline: 2px solid var(--oracle-red);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* Primary button */
+    .btn-primary {
+      width: 100%;
+      height: 44px;
+      background: var(--oracle-red);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-serif);
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: background var(--transition), transform 0.1s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--oracle-red-dark);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--oracle-red-dark);
+      outline-offset: 2px;
+    }
+
+    .btn-primary:disabled {
+      background: var(--gray-400);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+    }
+
+    .divider span {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--gray-400);
+      white-space: nowrap;
+    }
+
+    /* Third-party login */
+    .alt-login {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-alt {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      height: 42px;
+      background: var(--white);
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--gray-700);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .btn-alt:hover {
+      border-color: var(--gray-500);
+      background: var(--gray-100);
+    }
+
+    .btn-alt:focus-visible {
+      outline: 2px solid var(--oracle-red);
+      outline-offset: 2px;
+    }
+
+    .btn-alt svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Registration */
+    .register-prompt {
+      margin-top: 28px;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .register-prompt a {
+      color: var(--oracle-red);
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 4px;
+      transition: color var(--transition);
+    }
+
+    .register-prompt a:hover {
+      color: var(--oracle-red-dark);
+      text-decoration: underline;
+    }
+
+    .register-prompt a:focus-visible {
+      outline: 2px solid var(--oracle-red);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* Demo hint */
+    .demo-hint {
+      margin-top: 20px;
+      padding: 10px 12px;
+      background: var(--gray-100);
+      border: 1px dashed var(--gray-300);
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--gray-500);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .demo-hint code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      color: var(--gray-700);
+      background: var(--white);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page {
+        flex-direction: column;
+      }
+
+      .brand-panel {
+        flex: none;
+        max-width: none;
+        padding: 40px 28px 36px;
+      }
+
+      .brand-title {
+        font-size: 26px;
+      }
+
+      .brand-tagline {
+        margin-bottom: 28px;
+      }
+
+      .brand-features {
+        gap: 14px;
+      }
+
+      .form-panel {
+        padding: 32px 20px 48px;
+      }
+
+      .form-container {
+        padding: 36px 28px;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .brand-panel {
+        padding: 32px 20px 28px;
+      }
+
+      .brand-logo {
+        margin-bottom: 28px;
+      }
+
+      .brand-features li {
+        font-size: 13px;
+      }
+
+      .form-container {
+        padding: 28px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Brand Panel -->
+    <aside class="brand-panel" aria-label="平台介绍">
+      <div class="brand-logo">
+        <div class="brand-logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+          </svg>
+        </div>
+        <span class="brand-logo-text">Multimodal Interview</span>
+      </div>
+
+      <h1 class="brand-title">多模态模拟面试平台</h1>
+      <p class="brand-tagline">融合语音、视频与文本的智能面试训练系统，助你在真实场景中从容应对。</p>
+
+      <ul class="brand-features">
+        <li>
+          <span class="feature-icon" aria-hidden="true">◈</span>
+          <span class="feature-text">
+            <strong>多模态实时交互</strong>
+            支持语音对话、表情分析与代码白板，还原真实面试流程
+          </span>
+        </li>
+        <li>
+          <span class="feature-icon" aria-hidden="true">◈</span>
+          <span class="feature-text">
+            <strong>AI 智能评估反馈</strong>
+            从表达逻辑、技术深度到肢体语言，提供结构化改进建议
+          </span>
+        </li>
+        <li>
+          <span class="feature-icon" aria-hidden="true">◈</span>
+          <span class="feature-text">
+            <strong>行业题库精准匹配</strong>
+            覆盖互联网、金融、咨询等主流岗位，按需定制练习计划
+          </span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Form Panel -->
+    <main class="form-panel">
+      <div class="form-container">
+        <header class="form-header">
+          <h2>登录账号</h2>
+          <p>欢迎回来，请登录以继续您的面试训练</p>
+        </header>
+
+        <div id="formAlert" class="form-alert" role="alert" aria-live="polite">
+          账号或密码错误，请检查后重试。您还有 4 次尝试机会。
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="account">邮箱 / 手机号</label>
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="account"
+                name="account"
+                placeholder="请输入邮箱或手机号"
+                autocomplete="username"
+                required
+                aria-describedby="accountError"
+              >
+            </div>
+            <p id="accountError" class="field-error" role="alert">请输入有效的邮箱地址或手机号</p>
+          </div>
+
+          <div class="form-group">
+            <label for="password">密码</label>
+            <div class="input-wrapper password-wrapper">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="请输入密码"
+                autocomplete="current-password"
+                required
+                aria-describedby="passwordError"
+              >
+              <button
+                type="button"
+                class="toggle-password"
+                id="togglePassword"
+                aria-label="显示密码"
+                aria-pressed="false"
+              >
+                <svg id="iconEye" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+                <svg id="iconEyeOff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:none">
+                  <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                </svg>
+              </button>
+            </div>
+            <p id="passwordError" class="field-error" role="alert">密码不能为空，至少 6 位字符</p>
+          </div>
+
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="remember" name="remember">
+              记住我
+            </label>
+            <a href="#" class="forgot-link">忘记密码？</a>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submitBtn">登 录</button>
+        </form>
+
+        <div class="divider" aria-hidden="true"><span>其他登录方式</span></div>
+
+        <div class="alt-login">
+          <button type="button" class="btn-alt" id="phoneLogin">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 1H7C5.9 1 5 1.9 5 3v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm-5 20c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm5-4H7V4h10v13z" fill="currentColor"/>
+            </svg>
+            手机号快捷登录
+          </button>
+          <a href="#" class="btn-alt" id="githubLogin" aria-label="使用 GitHub 账号登录">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.165 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.635.24 2.865.12 3.165.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" fill="currentColor"/>
+            </svg>
+            使用 GitHub 登录
+          </a>
+        </div>
+
+        <p class="register-prompt">
+          还没有账号？<a href="#">立即注册</a>
+        </p>
+
+        <p class="demo-hint">
+          演示模式：输入任意账号，密码为 <code>demo123</code> 可模拟登录成功；其他组合将触发错误状态
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var form = document.getElementById('loginForm');
+      var accountInput = document.getElementById('account');
+      var passwordInput = document.getElementById('password');
+      var accountError = document.getElementById('accountError');
+      var passwordError = document.getElementById('passwordError');
+      var formAlert = document.getElementById('formAlert');
+      var submitBtn = document.getElementById('submitBtn');
+      var toggleBtn = document.getElementById('togglePassword');
+      var iconEye = document.getElementById('iconEye');
+      var iconEyeOff = document.getElementById('iconEyeOff');
+
+      var DEMO_PASSWORD = 'demo123';
+
+      function isValidAccount(value) {
+        if (!value.trim()) return false;
+        var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var phoneRe = /^1[3-9]\d{9}$/;
+        return emailRe.test(value.trim()) || phoneRe.test(value.trim());
+      }
+
+      function clearErrors() {
+        accountInput.classList.remove('error');
+        passwordInput.classList.remove('error');
+        accountError.classList.remove('visible');
+        passwordError.classList.remove('visible');
+        formAlert.classList.remove('visible');
+      }
+
+      function showFieldError(input, errorEl, message) {
+        input.classList.add('error');
+        errorEl.textContent = message;
+        errorEl.classList.add('visible');
+      }
+
+      accountInput.addEventListener('input', function () {
+        accountInput.classList.remove('error');
+        accountError.classList.remove('visible');
+        formAlert.classList.remove('visible');
+      });
+
+      passwordInput.addEventListener('input', function () {
+        passwordInput.classList.remove('error');
+        passwordError.classList.remove('visible');
+        formAlert.classList.remove('visible');
+      });
+
+      toggleBtn.addEventListener('click', function () {
+        var isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        iconEye.style.display = isPassword ? 'none' : 'block';
+        iconEyeOff.style.display = isPassword ? 'block' : 'none';
+        toggleBtn.setAttribute('aria-label', isPassword ? '隐藏密码' : '显示密码');
+        toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearErrors();
+
+        var account = accountInput.value.trim();
+        var password = passwordInput.value;
+        var hasError = false;
+
+        if (!account) {
+          showFieldError(accountInput, accountError, '请输入邮箱地址或手机号');
+          hasError = true;
+        } else if (!isValidAccount(account)) {
+          showFieldError(accountInput, accountError, '请输入有效的邮箱地址或手机号');
+          hasError = true;
+        }
+
+        if (!password) {
+          showFieldError(passwordInput, passwordError, '密码不能为空，至少 6 位字符');
+          hasError = true;
+        } else if (password.length < 6) {
+          showFieldError(passwordInput, passwordError, '密码长度不能少于 6 位');
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '登录中…';
+
+        setTimeout(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '登 录';
+
+          if (password === DEMO_PASSWORD) {
+            formAlert.style.background = '#F0FAF0';
+            formAlert.style.borderColor = '#A5D6A7';
+            formAlert.style.borderLeftColor = '#388E3C';
+            formAlert.style.color = '#2E7D32';
+            formAlert.textContent = '登录成功！正在跳转至面试训练中心…';
+            formAlert.classList.add('visible');
+            accountInput.classList.remove('error');
+            passwordInput.classList.remove('error');
+          } else {
+            formAlert.style.background = '';
+            formAlert.style.borderColor = '';
+            formAlert.style.borderLeftColor = '';
+            formAlert.style.color = '';
+            formAlert.textContent = '账号或密码错误，请检查后重试。您还有 4 次尝试机会。';
+            formAlert.classList.add('visible');
+            accountInput.classList.add('error');
+            passwordInput.classList.add('error');
+            accountInput.focus();
+          }
+        }, 800);
+      });
+
+      document.getElementById('phoneLogin').addEventListener('click', function () {
+        alert('手机号快捷登录功能即将上线，敬请期待。');
+      });
+
+      document.getElementById('githubLogin').addEventListener('click', function (e) {
+        e.preventDefault();
+        alert('GitHub OAuth 登录功能即将上线，敬请期待。');
+      });
+    })();
+  </script>
+</body>
+</html>

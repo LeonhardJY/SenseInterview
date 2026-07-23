@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面试大厅 · 多模态模拟面试平台</title>
+<style>
+  :root {
+    --oracle-red: #C74634;
+    --oracle-red-dark: #A83A2B;
+    --oracle-red-light: #E85D4A;
+    --oracle-red-bg: #FBEEEC;
+    --gray-900: #1A1A1A;
+    --gray-800: #2D2D2D;
+    --gray-700: #404040;
+    --gray-600: #5C5C5C;
+    --gray-500: #767676;
+    --gray-400: #9E9E9E;
+    --gray-300: #C4C4C4;
+    --gray-200: #E8E8E8;
+    --gray-100: #F5F5F5;
+    --white: #FFFFFF;
+    --success: #388E3C;
+    --success-bg: #F0FAF0;
+    --success-border: #A5D6A7;
+    --font-serif: "SimSun", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+    --font-sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --radius: 4px;
+    --transition: 0.2s ease;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+  }
+  ul { list-style: none; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+  input, select, button { font-family: var(--font-sans); }
+
+  /* Brand top accent line, echoes the login page's brand panel accent */
+  .brand-accent-bar {
+    height: 3px;
+    background: var(--oracle-red);
+    width: 100%;
+  }
+
+  /* ───────────────── Top Navigation ───────────────── */
+  .topnav {
+    background: var(--gray-900);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .topnav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .brand-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .brand-logo-mark {
+    width: 32px; height: 32px;
+    background: var(--oracle-red);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-logo-mark svg { width: 18px; height: 18px; fill: var(--white); }
+  .brand-logo-text {
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .brand-logo-text small {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    padding: 20px 4px;
+    font-size: 14px;
+    color: var(--gray-400);
+    position: relative;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-right: 24px;
+    transition: color var(--transition);
+  }
+  .nav-tab:hover { color: var(--white); }
+  .nav-tab.active { color: var(--white); }
+  .nav-tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: var(--oracle-red);
+  }
+
+  .nav-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+
+  .online-pill {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--gray-300);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #6FCF73;
+    box-shadow: 0 0 0 0 rgba(111,207,115,0.6);
+    animation: pulse-green 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(111,207,115,0.55); }
+    70% { box-shadow: 0 0 0 6px rgba(111,207,115,0); }
+    100% { box-shadow: 0 0 0 0 rgba(111,207,115,0); }
+  }
+  .online-pill strong { color: var(--white); font-weight: 600; }
+
+  .icon-btn {
+    position: relative;
+    width: 34px; height: 34px;
+    border: none;
+    background: transparent;
+    color: var(--gray-300);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .icon-btn svg { width: 19px; height: 19px; }
+  .icon-badge {
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--oracle-red-light);
+    border: 1.5px solid var(--gray-900);
+  }
+
+  .user-menu { position: relative; }
+  .user-avatar-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: transparent; border: none; cursor: pointer;
+    padding: 4px 6px 4px 4px;
+    border-radius: 999px;
+    transition: background var(--transition);
+  }
+  .user-avatar-btn:hover { background: rgba(255,255,255,0.08); }
+  .avatar-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--oracle-red);
+    color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .status-dot-corner {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    right: -1px; bottom: -1px;
+    border: 2px solid var(--gray-900);
+    background: #6FCF73;
+  }
+  .status-dot-corner.away { background: var(--gray-400); }
+  .status-dot-corner.busy { background: var(--oracle-red); }
+
+  .dropdown-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+    color: var(--gray-800);
+    padding: 8px;
+    display: none;
+    z-index: 60;
+  }
+  .dropdown-panel.open { display: block; }
+  .dropdown-panel .dp-title {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gray-500);
+    padding: 6px 10px 2px;
+    letter-spacing: 0.04em;
+  }
+  .dp-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px;
+    font-size: 13px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    color: var(--gray-700);
+  }
+  .dp-item:hover { background: var(--gray-100); }
+  .dp-item .dp-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .notif-panel { width: 300px; }
+  .notif-item {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--gray-100);
+    font-family: var(--font-sans);
+  }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item p { font-size: 12.5px; color: var(--gray-700); line-height: 1.5; }
+  .notif-item span { font-size: 11px; color: var(--gray-400); }
+
+  /* ───────────────── Page Layout ───────────────── */
+  .page-shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 60px;
+    display: grid;
+    grid-template-columns: 248px minmax(0,1fr) 296px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .panel-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-header h3 {
+    font-size: 14px;
+    font-weight: normal;
+    color: var(--gray-900);
+    letter-spacing: 0.02em;
+  }
+  .panel-header .ph-sub {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gray-400);
+  }
+
+  /* ── Left column ── */
+  .col-left { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 76px; }
+
+  .profile-card { padding: 20px 16px; text-align: left; }
+  .profile-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .profile-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--oracle-red); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0; position: relative;
+  }
+  .profile-name { font-size: 15px; color: var(--gray-900); }
+  .profile-sub { font-family: var(--font-sans); font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+
+  .status-select-wrap { position: relative; }
+  .status-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    color: var(--gray-700);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 8px 30px 8px 26px;
+    cursor: pointer;
+    position: relative;
+  }
+  .status-select-dot {
+    position: absolute;
+    left: 10px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #6FCF73;
+    pointer-events: none;
+  }
+  .status-select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 10px; top: 50%;
+    width: 7px; height: 7px;
+    border-right: 1.5px solid var(--gray-500);
+    border-bottom: 1.5px solid var(--gray-500);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .quick-list { padding: 6px; }
+  .quick-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .quick-item:hover { background: var(--gray-100); }
+  .quick-item svg { width: 16px; height: 16px; color: var(--gray-500); flex-shrink: 0; }
+  .quick-item .qi-badge {
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    color: var(--oracle-red);
+    background: var(--oracle-red-bg);
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+
+  .btn-create-room {
+    width: 100%;
+    padding: 13px 14px;
+    background: var(--oracle-red);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background var(--transition);
+  }
+  .btn-create-room:hover { background: var(--oracle-red-dark); }
+  .btn-create-room svg { width: 16px; height: 16px; }
+
+  /* ── Center column ── */
+  .col-center { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  .toolbar { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .search-row { display: flex; gap: 10px; }
+  .search-input-wrap { position: relative; flex: 1; }
+  .search-input-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--gray-400);
+  }
+  .search-input {
+    width: 100%; height: 42px;
+    padding: 0 14px 0 36px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    color: var(--gray-900);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .search-input::placeholder { color: var(--gray-400); }
+  .search-input:focus { border-color: var(--oracle-red); box-shadow: 0 0 0 3px rgba(199,70,52,0.12); }
+
+  .btn-quick-match {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 18px;
+    background: var(--white);
+    color: var(--oracle-red);
+    border: 1px solid var(--oracle-red);
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+    transition: background var(--transition), color var(--transition);
+  }
+  .btn-quick-match:hover { background: var(--oracle-red); color: var(--white); }
+  .btn-quick-match svg { width: 15px; height: 15px; }
+
+  .filter-groups { display: flex; flex-wrap: wrap; gap: 20px 28px; }
+  .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-group .fg-label {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    flex-shrink: 0;
+    margin-right: 2px;
+  }
+  .chip {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--gray-600);
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+    transition: all var(--transition);
+  }
+  .chip:hover { border-color: var(--gray-500); }
+  .chip.active {
+    background: var(--gray-900);
+    border-color: var(--gray-900);
+    color: var(--white);
+  }
+  .chip .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+
+  .list-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2px 2px;
+  }
+  .list-header .lh-left { display: flex; align-items: baseline; gap: 8px; }
+  .list-header h2 { font-size: 16px; font-weight: normal; color: var(--gray-900); }
+  .list-header .lh-count { font-family: var(--font-sans); font-size: 12px; color: var(--gray-500); }
+
+  .view-toggle {
+    display: flex; border: 1px solid var(--gray-300); border-radius: var(--radius); overflow: hidden;
+  }
+  .view-toggle button {
+    width: 32px; height: 30px;
+    background: var(--white);
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition), color var(--transition);
+  }
+  .view-toggle button + button { border-left: 1px solid var(--gray-300); }
+  .view-toggle button.active { background: var(--gray-900); color: var(--white); }
+  .view-toggle svg { width: 15px; height: 15px; }
+
+  /* Room cards */
+  .room-container.grid-view {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .room-container.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .room-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  }
+  .room-card:hover {
+    border-color: var(--gray-300);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+  }
+  .room-card.is-ended { opacity: 0.62; }
+
+  .rc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .status-badge {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    padding: 3px 9px 3px 8px;
+    border-radius: 999px;
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .status-badge.waiting { color: var(--gray-600); background: var(--gray-100); border: 1px solid var(--gray-300); }
+  .status-badge.live { color: var(--oracle-red-dark); background: var(--oracle-red-bg); border: 1px solid #F0C9C2; }
+  .status-badge.ended { color: var(--gray-500); background: var(--gray-100); border: 1px solid var(--gray-200); }
+  .status-badge .sb-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .status-badge.live .sb-dot { animation: pulse-red 1.8s infinite; }
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(199,70,52,0.5); }
+    70% { box-shadow: 0 0 0 5px rgba(199,70,52,0); }
+    100% { box-shadow: 0 0 0 0 rgba(199,70,52,0); }
+  }
+
+  .mode-tag {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    padding: 3px 9px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+  }
+
+  .rc-title { font-size: 15.5px; color: var(--gray-900); line-height: 1.4; }
+
+  .rc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag-pill {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gray-600);
+    background: var(--gray-100);
+    padding: 3px 9px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .tag-pill .diff-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .diff-dot.d1 { background: var(--gray-400); }
+  .diff-dot.d2 { background: var(--gray-600); }
+  .diff-dot.d3 { background: var(--oracle-red); }
+
+  .rc-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-100);
+  }
+  .rc-capacity {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  .rc-capacity svg { width: 14px; height: 14px; }
+  .rc-capacity strong { color: var(--gray-800); font-weight: 600; }
+
+  .btn-join {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    background: var(--oracle-red);
+    color: var(--white);
+    transition: background var(--transition);
+    white-space: nowrap;
+  }
+  .btn-join:hover { background: var(--oracle-red-dark); }
+  .btn-join:disabled {
+    background: var(--gray-200);
+    color: var(--gray-400);
+    cursor: not-allowed;
+  }
+  .btn-join.ghost {
+    background: transparent;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+  }
+  .btn-join.ghost:hover { background: var(--gray-100); }
+
+  /* list view row layout override */
+  .room-container.list-view .room-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  .room-container.list-view .rc-top { flex-direction: column; align-items: flex-start; gap: 6px; width: 108px; flex-shrink: 0; }
+  .room-container.list-view .rc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .room-container.list-view .rc-title { font-size: 14.5px; }
+  .room-container.list-view .rc-bottom { border-top: none; padding-top: 0; margin-top: 0; flex-shrink: 0; gap: 16px; }
+
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--gray-400);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+
+  /* ── Right column ── */
+  .col-right { display: flex; flex-direction: column; gap: 16px; }
+  .stat-numbers { display: flex; padding: 4px 16px 16px; gap: 10px; }
+  .stat-box { flex: 1; text-align: center; padding: 10px 4px; background: var(--gray-100); border-radius: var(--radius); }
+  .stat-box .sv { font-size: 20px; color: var(--gray-900); font-family: var(--font-sans); font-weight: 600; }
+  .stat-box .sl { font-size: 11px; color: var(--gray-500); margin-top: 3px; font-family: var(--font-sans); }
+
+  .week-chart { display: flex; align-items: flex-end; gap: 6px; height: 70px; padding: 0 16px 16px; }
+  .wc-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .wc-bar { width: 100%; background: var(--gray-200); border-radius: 3px 3px 0 0; position: relative; }
+  .wc-bar.today { background: var(--oracle-red); }
+  .wc-label { font-family: var(--font-sans); font-size: 10px; color: var(--gray-400); }
+
+  .reminder-list, .recommend-list { padding: 4px 6px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .reminder-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius);
+    transition: background var(--transition);
+  }
+  .reminder-item:hover { background: var(--gray-100); }
+  .ri-time {
+    flex-shrink: 0;
+    width: 46px;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--oracle-red-dark);
+    background: var(--oracle-red-bg);
+    border-radius: var(--radius);
+    padding: 5px 2px;
+    line-height: 1.3;
+  }
+  .ri-body { flex: 1; min-width: 0; }
+  .ri-body .rt { font-size: 13px; color: var(--gray-800); }
+  .ri-body .rs { font-family: var(--font-sans); font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+
+  .recommend-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .recommend-item:hover { background: var(--gray-100); }
+  .rec-rank {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    background: var(--gray-900);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .recommend-item:nth-child(1) .rec-rank { background: var(--oracle-red); }
+  .rec-body { flex: 1; min-width: 0; }
+  .rec-body .rn { font-size: 13px; color: var(--gray-800); }
+  .rec-body .rc-meta { font-family: var(--font-sans); font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,26,26,0.5);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white);
+    width: 100%; max-width: 440px;
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-box h3 { font-size: 18px; color: var(--gray-900); margin-bottom: 4px; font-weight: normal; }
+  .modal-box .modal-sub { font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-500); margin-bottom: 22px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-family: var(--font-sans); font-size: 12.5px;
+    color: var(--gray-700); margin-bottom: 6px;
+  }
+  .form-group input[type="text"], .form-group select {
+    width: 100%; height: 40px; padding: 0 12px;
+    border: 1px solid var(--gray-300); border-radius: var(--radius);
+    font-family: var(--font-sans); font-size: 13px; color: var(--gray-900);
+    outline: none;
+    background: var(--white);
+    transition: border-color var(--transition);
+  }
+  .form-group input[type="text"]:focus, .form-group select:focus {
+    border-color: var(--oracle-red);
+    box-shadow: 0 0 0 3px rgba(199,70,52,0.12);
+  }
+  .form-row-2 { display: flex; gap: 12px; }
+  .form-row-2 .form-group { flex: 1; }
+
+  .privacy-toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; background: var(--gray-100); border-radius: var(--radius);
+    margin-bottom: 20px;
+  }
+  .privacy-toggle-row span { font-family: var(--font-sans); font-size: 12.5px; color: var(--gray-700); }
+  .switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; inset: 0; background: var(--gray-300); border-radius: 999px;
+    cursor: pointer; transition: background var(--transition);
+  }
+  .switch-track::before {
+    content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px;
+    background: var(--white); border-radius: 50%; transition: transform var(--transition);
+  }
+  .switch input:checked + .switch-track { background: var(--oracle-red); }
+  .switch input:checked + .switch-track::before { transform: translateX(16px); }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+  .btn-secondary {
+    flex: 1; height: 42px; background: var(--white); color: var(--gray-700);
+    border: 1px solid var(--gray-300); border-radius: var(--radius);
+    font-family: var(--font-serif); font-size: 14px; cursor: pointer;
+    transition: background var(--transition);
+  }
+  .btn-secondary:hover { background: var(--gray-100); }
+  .btn-primary-modal {
+    flex: 1.4; height: 42px; background: var(--oracle-red); color: var(--white);
+    border: none; border-radius: var(--radius);
+    font-family: var(--font-serif); font-size: 14px; cursor: pointer;
+    transition: background var(--transition);
+  }
+  .btn-primary-modal:hover { background: var(--oracle-red-dark); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--gray-900);
+    color: var(--white);
+    padding: 13px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 200;
+    border-left: 3px solid var(--oracle-red);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast svg { width: 16px; height: 16px; color: #6FCF73; flex-shrink: 0; }
+
+  /* ── Onboarding pin ── */
+  .onboarding-fab {
+    position: fixed;
+    right: 24px; bottom: 24px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: var(--gray-900);
+    color: var(--white);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    z-index: 50;
+    transition: background var(--transition);
+  }
+  .onboarding-fab:hover { background: var(--oracle-red); }
+
+  /* ───────────────── Responsive ───────────────── */
+  @media (max-width: 1180px) {
+    .page-shell {
+      grid-template-columns: 1fr;
+      max-width: 720px;
+    }
+    .col-left { order: 1; position: static; flex-direction: row; flex-wrap: wrap; }
+    .col-left .profile-card, .col-left .quick-links-panel { flex: 1; min-width: 260px; }
+    .col-center { order: 2; }
+    .col-right { order: 3; }
+    .room-container.grid-view { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 720px) {
+    .topnav-inner { padding: 0 16px; gap: 16px; }
+    .brand-logo-text { font-size: 13px; }
+    .online-pill span.op-label { display: none; }
+    .page-shell { padding: 16px 14px 60px; }
+    .col-left { flex-direction: column; }
+    .filter-groups { gap: 14px 20px; }
+    .room-container.grid-view { grid-template-columns: 1fr; }
+    .room-container.list-view .room-card { flex-direction: column; align-items: stretch; }
+    .room-container.list-view .rc-top { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; }
+    .room-container.list-view .rc-bottom { justify-content: space-between; }
+    .modal-box { padding: 22px 18px 18px; }
+    .form-row-2 { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="brand-accent-bar"></div>
+
+<!-- ───────────── Top Navigation ───────────── -->
+<header class="topnav">
+  <div class="topnav-inner">
+    <div class="brand-logo">
+      <div class="brand-logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <div class="brand-logo-text">多模态模拟面试<small>MULTIMODAL INTERVIEW</small></div>
+    </div>
+
+    <nav class="nav-tabs" aria-label="主导航">
+      <div class="nav-tab active">面试大厅</div>
+      <div class="nav-tab">个人中心</div>
+      <div class="nav-tab">练习记录</div>
+    </nav>
+
+    <div class="nav-right">
+      <div class="online-pill" title="当前在线人数">
+        <span class="live-dot"></span>
+        <span class="op-label">当前在线</span>
+        <strong id="onlineCount">1,284</strong>
+      </div>
+
+      <div class="user-menu" id="notifMenu">
+        <button class="icon-btn" id="notifBtn" aria-label="消息通知">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="icon-badge"></span>
+        </button>
+        <div class="dropdown-panel notif-panel" id="notifPanel">
+          <div class="dp-title">消息通知</div>
+          <div class="notif-item"><p>「算法与数据结构」高级考官模拟房间即将开始</p><span>3 分钟前</span></div>
+          <div class="notif-item"><p>你收藏的题库《系统设计面试手册》更新了 5 道新题</p><span>1 小时前</span></div>
+          <div class="notif-item"><p>上次「JVM 调优实战演练」的面试报告已生成</p><span>昨天 20:14</span></div>
+        </div>
+      </div>
+
+      <div class="user-menu" id="userMenu">
+        <button class="user-avatar-btn" id="avatarBtn">
+          <div class="avatar-circle">陈<span class="status-dot-corner" id="statusDotCorner"></span></div>
+        </button>
+        <div class="dropdown-panel" id="userPanel">
+          <div class="dp-title">设置在线状态</div>
+          <div class="dp-item" data-status="online"><span class="dp-status-dot" style="background:#6FCF73"></span>在线</div>
+          <div class="dp-item" data-status="away"><span class="dp-status-dot" style="background:var(--gray-400)"></span>离开</div>
+          <div class="dp-item" data-status="busy"><span class="dp-status-dot" style="background:var(--oracle-red)"></span>勿扰</div>
+          <div class="dp-title" style="margin-top:4px;">账号</div>
+          <div class="dp-item">个人中心</div>
+          <div class="dp-item">退出登录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ───────────── Main Layout ───────────── -->
+<div class="page-shell">
+
+  <!-- LEFT: user status & quick entry -->
+  <aside class="col-left">
+    <div class="panel profile-card">
+      <div class="profile-top">
+        <div class="profile-avatar">陈</div>
+        <div>
+          <div class="profile-name">陈明远</div>
+          <div class="profile-sub">前端方向 · 中级练习者</div>
+        </div>
+      </div>
+      <div class="status-select-wrap">
+        <span class="status-select-dot" id="miniStatusDot"></span>
+        <select class="status-select" id="statusSelect">
+          <option value="online">在线 · 可被邀请对练</option>
+          <option value="away">离开</option>
+          <option value="busy">勿扰</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="panel quick-links-panel">
+      <div class="quick-list">
+        <div class="quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          我的房间
+          <span class="qi-badge">2</span>
+        </div>
+        <div class="quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3l-6.16 3.24 1.18-6.88L2 8.9l6.92-1L12 1.5l3.08 6.4 6.92 1-5.02 4.76 1.18 6.88z"/></svg>
+          收藏题库
+        </div>
+        <div class="quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><path d="M9 15l10-10 4 4-10 10H9v-4z"/></svg>
+          面试报告
+        </div>
+        <div class="quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+          新手引导
+        </div>
+        <div class="quick-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          设置
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-create-room" id="openCreateModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      创建面试房间
+    </button>
+  </aside>
+
+  <!-- CENTER: search / filter / room list -->
+  <main class="col-center">
+    <div class="panel toolbar">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="按岗位方向或关键词搜索房间，如「前端」「动态规划」">
+        </div>
+        <button class="btn-quick-match" id="quickMatchBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+          快速匹配
+        </button>
+      </div>
+
+      <div class="filter-groups">
+        <div class="filter-group" data-group="direction">
+          <span class="fg-label">方向</span>
+          <button class="chip active" data-value="all">全部</button>
+          <button class="chip" data-value="前端开发">前端开发</button>
+          <button class="chip" data-value="Java后端">Java 后端</button>
+          <button class="chip" data-value="算法与数据结构">算法</button>
+          <button class="chip" data-value="产品经理">产品经理</button>
+          <button class="chip" data-value="测试开发">测试开发</button>
+          <button class="chip" data-value="大数据">大数据</button>
+        </div>
+        <div class="filter-group" data-group="difficulty">
+          <span class="fg-label">难度</span>
+          <button class="chip active" data-value="all">全部</button>
+          <button class="chip" data-value="初级">初级</button>
+          <button class="chip" data-value="中级">中级</button>
+          <button class="chip" data-value="高级">高级</button>
+        </div>
+        <div class="filter-group" data-group="mode">
+          <span class="fg-label">模式</span>
+          <button class="chip active" data-value="all">全部</button>
+          <button class="chip" data-value="AI对练">AI 对练</button>
+          <button class="chip" data-value="真人互考">真人互考</button>
+          <button class="chip" data-value="考官模拟">考官模拟</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-header">
+      <div class="lh-left">
+        <h2>房间列表</h2>
+        <span class="lh-count" id="roomCount">共 10 个房间</span>
+      </div>
+      <div class="view-toggle">
+        <button class="active" id="viewGridBtn" aria-label="卡片视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button id="viewListBtn" aria-label="列表视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="room-container grid-view" id="roomContainer"></div>
+  </main>
+
+  <!-- RIGHT: personal progress & recommendations -->
+  <aside class="col-right">
+    <div class="panel">
+      <div class="panel-header"><h3>本周练习统计</h3><span class="ph-sub">近 7 天</span></div>
+      <div class="week-chart" id="weekChart"></div>
+      <div class="stat-numbers">
+        <div class="stat-box"><div class="sv">45<span style="font-size:12px;">分</span></div><div class="sl">今日时长</div></div>
+        <div class="stat-box"><div class="sv">6</div><div class="sl">本周场次</div></div>
+        <div class="stat-box"><div class="sv">82</div><div class="sl">平均得分</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h3>近期预约提醒</h3></div>
+      <div class="reminder-list">
+        <div class="reminder-item">
+          <div class="ri-time">明天<br>14:00</div>
+          <div class="ri-body">
+            <div class="rt">Java 后端 · 中级真人互考</div>
+            <div class="rs">对手已确认参加</div>
+          </div>
+        </div>
+        <div class="reminder-item">
+          <div class="ri-time">周五<br>19:30</div>
+          <div class="ri-body">
+            <div class="rt">算法专项 · 高级考官模拟</div>
+            <div class="rs">系统将提前 10 分钟提醒</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h3>热门题库推荐</h3></div>
+      <div class="recommend-list">
+        <div class="recommend-item">
+          <div class="rec-rank">1</div>
+          <div class="rec-body"><div class="rn">前端八股文精选 200 题</div><div class="rc-meta">3.2 万人练习过</div></div>
+        </div>
+        <div class="recommend-item">
+          <div class="rec-rank">2</div>
+          <div class="rec-body"><div class="rn">LeetCode 高频算法 100 题</div><div class="rc-meta">2.7 万人练习过</div></div>
+        </div>
+        <div class="recommend-item">
+          <div class="rec-rank">3</div>
+          <div class="rec-body"><div class="rn">系统设计面试手册</div><div class="rc-meta">1.5 万人练习过</div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ───────────── Create Room Modal ───────────── -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal-box">
+    <h3>创建面试房间</h3>
+    <p class="modal-sub">设置房间信息后即可邀请他人加入或开始练习</p>
+    <form id="createRoomForm">
+      <div class="form-group">
+        <label for="roomTitle">房间主题</label>
+        <input type="text" id="roomTitle" placeholder="如：React 组件设计深挖" required>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="roomDirection">方向</label>
+          <select id="roomDirection">
+            <option>前端开发</option>
+            <option>Java 后端</option>
+            <option>算法与数据结构</option>
+            <option>产品经理</option>
+            <option>测试开发</option>
+            <option>大数据</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="roomDifficulty">难度</label>
+          <select id="roomDifficulty">
+            <option>初级</option>
+            <option>中级</option>
+            <option>高级</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label for="roomMode">面试模式</label>
+          <select id="roomMode">
+            <option>AI 对练</option>
+            <option>真人互考</option>
+            <option>考官模拟</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="roomBank">题目集</label>
+          <select id="roomBank">
+            <option>前端八股文精选</option>
+            <option>LeetCode 高频算法</option>
+            <option>系统设计面试手册</option>
+            <option>自定义题目集</option>
+          </select>
+        </div>
+      </div>
+      <div class="privacy-toggle-row">
+        <span>设为私密房间（仅邀请码可加入）</span>
+        <label class="switch">
+          <input type="checkbox" id="privacyToggle">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="closeCreateModal">取消</button>
+        <button type="submit" class="btn-primary-modal">创建并进入房间</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<button class="onboarding-fab" id="onboardingFab" aria-label="新手引导" title="新手引导">?</button>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">操作成功</span>
+</div>
+
+<script>
+(function () {
+  // ── Sample room data ──
+  var rooms = [
+    { id: 1, title: "React 组件设计深挖", direction: "前端开发", difficulty: "中级", mode: "AI对练", status: "live", count: 3, max: 4 },
+    { id: 2, title: "JVM 调优实战演练", direction: "Java后端", difficulty: "高级", mode: "考官模拟", status: "waiting", count: 1, max: 2 },
+    { id: 3, title: "动态规划高频真题精讲", direction: "算法与数据结构", difficulty: "高级", mode: "真人互考", status: "live", count: 2, max: 2 },
+    { id: 4, title: "产品竞品分析速练", direction: "产品经理", difficulty: "初级", mode: "AI对练", status: "waiting", count: 0, max: 1 },
+    { id: 5, title: "接口自动化测试专场", direction: "测试开发", difficulty: "中级", mode: "真人互考", status: "waiting", count: 1, max: 2 },
+    { id: 6, title: "分布式系统设计问答", direction: "Java后端", difficulty: "高级", mode: "考官模拟", status: "live", count: 4, max: 6 },
+    { id: 7, title: "前端性能优化复盘", direction: "前端开发", difficulty: "中级", mode: "AI对练", status: "ended", count: 4, max: 4 },
+    { id: 8, title: "海量数据处理面试题", direction: "大数据", difficulty: "高级", mode: "真人互考", status: "ended", count: 2, max: 2 },
+    { id: 9, title: "算法基础：排序与查找", direction: "算法与数据结构", difficulty: "初级", mode: "AI对练", status: "waiting", count: 0, max: 1 },
+    { id: 10, title: "产品需求文档评审模拟", direction: "产品经理", difficulty: "中级", mode: "考官模拟", status: "live", count: 2, max: 3 }
+  ];
+
+  var statusMeta = {
+    waiting: { label: "待开始", cls: "waiting" },
+    live: { label: "进行中", cls: "live" },
+    ended: { label: "已结束", cls: "ended" }
+  };
+  var diffDot = { "初级": "d1", "中级": "d2", "高级": "d3" };
+
+  var container = document.getElementById("roomContainer");
+  var roomCountEl = document.getElementById("roomCount");
+  var searchInput = document.getElementById("searchInput");
+
+  var filters = { direction: "all", difficulty: "all", mode: "all" };
+
+  function capacityIconSvg() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>';
+  }
+
+  function renderRoomCard(r) {
+    var sm = statusMeta[r.status];
+    var full = r.count >= r.max;
+    var joinLabel = "加入房间";
+    var joinDisabled = false;
+    var ghost = false;
+
+    if (r.status === "ended") {
+      joinLabel = "查看回顾";
+      ghost = true;
+    } else if (full) {
+      joinLabel = "已满员";
+      joinDisabled = true;
+    } else if (r.status === "waiting") {
+      joinLabel = "加入房间";
+    } else {
+      joinLabel = "加入房间";
+    }
+
+    var card = document.createElement("div");
+    card.className = "room-card" + (r.status === "ended" ? " is-ended" : "");
+    card.innerHTML =
+      '<div class="rc-top">' +
+        '<span class="status-badge ' + sm.cls + '"><span class="sb-dot"></span>' + sm.label + '</span>' +
+        '<span class="mode-tag">' + r.mode.replace("对练","对练").replace("互考","互考") + '</span>' +
+      '</div>' +
+      '<div class="rc-main">' +
+        '<div class="rc-title">' + r.title + '</div>' +
+        '<div class="rc-tags">' +
+          '<span class="tag-pill">' + r.direction + '</span>' +
+          '<span class="tag-pill"><span class="diff-dot ' + diffDot[r.difficulty] + '"></span>' + r.difficulty + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rc-bottom">' +
+        '<span class="rc-capacity">' + capacityIconSvg() + '<strong>' + r.count + '</strong>/' + r.max + '</span>' +
+        '<button class="btn-join' + (ghost ? ' ghost' : '') + '" ' + (joinDisabled ? 'disabled' : '') + ' data-id="' + r.id + '">' + joinLabel + '</button>' +
+      '</div>';
+    return card;
+  }
+
+  function applyFiltersAndRender() {
+    var q = searchInput.value.trim().toLowerCase();
+    var filtered = rooms.filter(function (r) {
+      if (filters.direction !== "all" && r.direction !== filters.direction) return false;
+      if (filters.difficulty !== "all" && r.difficulty !== filters.difficulty) return false;
+      if (filters.mode !== "all" && r.mode !== filters.mode) return false;
+      if (q && r.title.toLowerCase().indexOf(q) === -1 && r.direction.toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+
+    container.innerHTML = "";
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-state">没有匹配的房间，试试调整筛选条件或换个关键词</div>';
+    } else {
+      filtered.forEach(function (r) { container.appendChild(renderRoomCard(r)); });
+    }
+    roomCountEl.textContent = "共 " + filtered.length + " 个房间";
+  }
+
+  // filter chip clicks
+  document.querySelectorAll(".filter-group").forEach(function (group) {
+    var key = group.getAttribute("data-group");
+    group.querySelectorAll(".chip").forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        group.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+        chip.classList.add("active");
+        filters[key] = chip.getAttribute("data-value");
+        applyFiltersAndRender();
+      });
+    });
+  });
+
+  searchInput.addEventListener("input", applyFiltersAndRender);
+
+  // view toggle
+  var gridBtn = document.getElementById("viewGridBtn");
+  var listBtn = document.getElementById("viewListBtn");
+  gridBtn.addEventListener("click", function () {
+    container.className = "room-container grid-view";
+    gridBtn.classList.add("active");
+    listBtn.classList.remove("active");
+  });
+  listBtn.addEventListener("click", function () {
+    container.className = "room-container list-view";
+    listBtn.classList.add("active");
+    gridBtn.classList.remove("active");
+  });
+
+  // join button (event delegation)
+  container.addEventListener("click", function (e) {
+    var btn = e.target.closest(".btn-join");
+    if (!btn || btn.disabled) return;
+    var id = btn.getAttribute("data-id");
+    var room = rooms.find(function (r) { return String(r.id) === id; });
+    showToast(room && room.status === "ended" ? "正在打开「" + room.title + "」的面试回顾" : "正在进入房间「" + (room ? room.title : "") + "」…");
+  });
+
+  // quick match
+  document.getElementById("quickMatchBtn").addEventListener("click", function () {
+    var candidates = rooms.filter(function (r) { return r.status !== "ended" && r.count < r.max; });
+    if (candidates.length === 0) {
+      showToast("暂无可匹配的房间，可尝试创建新房间");
+      return;
+    }
+    var picked = candidates[Math.floor(Math.random() * candidates.length)];
+    showToast("正在为你匹配房间…");
+    setTimeout(function () {
+      showToast("已匹配到「" + picked.title + "」，正在进入…");
+    }, 900);
+  });
+
+  // toast
+  var toast = document.getElementById("toast");
+  var toastMsg = document.getElementById("toastMsg");
+  var toastTimer = null;
+  function showToast(msg) {
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+  }
+
+  // create room modal
+  var modal = document.getElementById("createModal");
+  document.getElementById("openCreateModal").addEventListener("click", function () { modal.classList.add("open"); });
+  document.getElementById("closeCreateModal").addEventListener("click", function () { modal.classList.remove("open"); });
+  modal.addEventListener("click", function (e) { if (e.target === modal) modal.classList.remove("open"); });
+  document.getElementById("createRoomForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var title = document.getElementById("roomTitle").value.trim() || "未命名房间";
+    modal.classList.remove("open");
+    document.getElementById("createRoomForm").reset();
+    showToast("房间「" + title + "」创建成功，正在进入…");
+  });
+
+  // onboarding fab
+  document.getElementById("onboardingFab").addEventListener("click", function () {
+    showToast("新手引导：3 步教你完成第一场模拟面试");
+  });
+
+  // notif dropdown
+  function setupDropdown(btnId, panelId) {
+    var btn = document.getElementById(btnId);
+    var panel = document.getElementById(panelId);
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOpen = panel.classList.contains("open");
+      document.querySelectorAll(".dropdown-panel.open").forEach(function (p) { p.classList.remove("open"); });
+      if (!isOpen) panel.classList.add("open");
+    });
+  }
+  setupDropdown("notifBtn", "notifPanel");
+  setupDropdown("avatarBtn", "userPanel");
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".dropdown-panel.open").forEach(function (p) { p.classList.remove("open"); });
+  });
+
+  // status switching (avatar corner dot + mini select dot)
+  var statusDotCorner = document.getElementById("statusDotCorner");
+  var miniStatusDot = document.getElementById("miniStatusDot");
+  var statusSelect = document.getElementById("statusSelect");
+  var statusColors = { online: "#6FCF73", away: "#9E9E9E", busy: "#C74634" };
+
+  document.querySelectorAll("#userPanel .dp-item[data-status]").forEach(function (item) {
+    item.addEventListener("click", function () {
+      var s = item.getAttribute("data-status");
+      applyStatus(s);
+      statusSelect.value = s;
+      document.getElementById("userPanel").classList.remove("open");
+    });
+  });
+  statusSelect.addEventListener("change", function () { applyStatus(statusSelect.value); });
+  function applyStatus(s) {
+    statusDotCorner.className = "status-dot-corner" + (s === "away" ? " away" : s === "busy" ? " busy" : "");
+    miniStatusDot.style.background = statusColors[s] || statusColors.online;
+  }
+
+  // week chart (mon-sun minutes, today highlighted)
+  var weekData = [30, 45, 20, 60, 35, 50, 45];
+  var weekLabels = ["一", "二", "三", "四", "五", "六", "日"];
+  var todayIdx = 3;
+  var chartEl = document.getElementById("weekChart");
+  var maxVal = Math.max.apply(null, weekData);
+  weekData.forEach(function (v, i) {
+    var wrap = document.createElement("div");
+    wrap.className = "wc-bar-wrap";
+    var barHeight = Math.max(6, Math.round((v / maxVal) * 54));
+    wrap.innerHTML =
+      '<div class="wc-bar' + (i === todayIdx ? ' today' : '') + '" style="height:' + barHeight + 'px;"></div>' +
+      '<span class="wc-label">' + weekLabels[i] + '</span>';
+    chartEl.appendChild(wrap);
+  });
+
+  // gentle live online counter fluctuation
+  var onlineEl = document.getElementById("onlineCount");
+  var onlineBase = 1284;
+  setInterval(function () {
+    onlineBase += Math.floor(Math.random() * 7) - 3;
+    if (onlineBase < 1200) onlineBase = 1200;
+    onlineEl.textContent = onlineBase.toLocaleString("zh-CN");
+  }, 4000);
+
+  // initial render
+  applyFiltersAndRender();
+})();
+</script>
+</body>
+</html>
