@@ -1,0 +1,43 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: ai-service
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+
+ai:
+  # AI模型配置
+  model:
+    # ASR语音识别配置
+    asr:
+      provider: aliyun
+      app-key: your-app-key
+      access-key-id: your-access-key-id
+      access-key-secret: your-access-key-secret
+    # NLP自然语言处理配置
+    nlp:
+      provider: aliyun
+      app-key: your-app-key
+      access-key-id: your-access-key-id
+      access-key-secret: your-access-key-secret
+    # LLM大语言模型配置
+    llm:
+      provider: openai
+      api-key: your-api-key
+      api-url: https://api.openai.com/v1
+      model: gpt-3.5-turbo
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
