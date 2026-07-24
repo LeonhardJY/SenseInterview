@@ -35,7 +35,7 @@ public class AuthController {
 
     @Operation(summary = "手机号登录（未实现）")
     @PostMapping("/sms")
-    public Result<Void> smsLogin(@RequestParam String phone) {
+    public Result<Void> smsLogin(@RequestParam("phone") String phone) {
         return Result.error("该功能暂未上线，敬请期待");
     }
 

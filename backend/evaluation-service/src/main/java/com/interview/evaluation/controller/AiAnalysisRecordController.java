@@ -20,7 +20,7 @@ public class AiAnalysisRecordController {
 
     @Operation(summary = "获取面试分析记录")
     @GetMapping("/task/{taskId}")
-    public Result<List<AiAnalysisRecord>> getAnalysisByTaskId(@PathVariable Long taskId) {
+    public Result<List<AiAnalysisRecord>> getAnalysisByTaskId(@PathVariable("taskId") Long taskId) {
         List<AiAnalysisRecord> list = aiAnalysisRecordService.findByTaskId(taskId);
         return Result.success(list);
     }

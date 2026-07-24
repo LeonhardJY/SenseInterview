@@ -42,6 +42,18 @@ const routes = [
         name: 'History',
         component: () => import('@/views/History.vue'),
         meta: { title: '历史记录' }
+      },
+      {
+        path: 'resume',
+        name: 'Resume',
+        component: () => import('@/views/Resume.vue'),
+        meta: { title: '简历管理' }
+      },
+      {
+        path: 'question-bank',
+        name: 'QuestionBank',
+        component: () => import('@/views/QuestionBank.vue'),
+        meta: { title: '面试题库' }
       }
     ]
   }

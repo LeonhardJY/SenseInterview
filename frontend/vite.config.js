@@ -12,8 +12,44 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
+      '/api/auth': {
+        target: 'http://localhost:8081',
+        changeOrigin: true
+      },
+      '/api/user': {
+        target: 'http://localhost:8081',
+        changeOrigin: true
+      },
+      '/api/resume': {
+        target: 'http://localhost:8081',
+        changeOrigin: true
+      },
+      '/api/interview': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
+      },
+      '/api/job': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
+      },
+      '/api/hot': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
+      },
+      '/api/question': {
+        target: 'http://localhost:8083',
+        changeOrigin: true
+      },
+      '/api/evaluation': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
+      },
+      '/api/report': {
+        target: 'http://localhost:8082',
+        changeOrigin: true
+      },
+      '/api/ai': {
+        target: 'http://localhost:8086',
         changeOrigin: true
       },
       '/ws': {

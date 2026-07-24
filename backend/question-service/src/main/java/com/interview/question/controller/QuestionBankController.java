@@ -27,14 +27,14 @@ public class QuestionBankController {
 
     @Operation(summary = "根据分类获取题目")
     @GetMapping("/category/{category}")
-    public Result<List<QuestionBank>> listByCategory(@PathVariable String category) {
+    public Result<List<QuestionBank>> listByCategory(@PathVariable("category") String category) {
         List<QuestionBank> list = questionBankService.findByCategory(category);
         return Result.success(list);
     }
 
     @Operation(summary = "根据难度获取题目")
     @GetMapping("/level/{level}")
-    public Result<List<QuestionBank>> listByLevel(@PathVariable String level) {
+    public Result<List<QuestionBank>> listByLevel(@PathVariable("level") String level) {
         List<QuestionBank> list = questionBankService.findByLevel(level);
         return Result.success(list);
     }
@@ -55,7 +55,7 @@ public class QuestionBankController {
 
     @Operation(summary = "删除题目")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
+    public Result<Void> delete(@PathVariable("id") Long id) {
         questionBankService.removeById(id);
         return Result.success();
     }

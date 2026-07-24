@@ -1,8 +1,10 @@
 <template>
   <div class="report">
     <div class="report-header">
-      <h1>面试报告</h1>
-      <el-button @click="goBack">返回大厅</el-button>
+      <div class="ph-left">
+        <button class="btn-back" @click="$router.push('/lobby')">← 返回</button>
+        <h1>面试报告</h1>
+      </div>
     </div>
 
     <div class="report-content">
@@ -116,9 +118,32 @@ const goBack = () => {
   margin-bottom: 24px;
 }
 
+.ph-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .report-header h1 {
   font-size: 24px;
   color: #1A1A1A;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #C4C4C4;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  border-color: #C74634;
+  color: #C74634;
 }
 
 .report-content {

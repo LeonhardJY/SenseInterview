@@ -66,6 +66,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
+import { ElMessage } from 'element-plus'
 import api from '@/api'
 
 const router = useRouter()
@@ -98,6 +99,9 @@ const handleLogin = async () => {
   try {
     const res = await api.post('/auth/login', loginForm.value)
     userStore.setToken(res.data.token)
+    localStorage.setItem('userId', res.data.userId)
+    localStorage.setItem('username', res.data.username)
+    localStorage.setItem('userRole', res.data.role)
     router.push('/')
   } catch (error) {
     console.error(error)

@@ -18,6 +18,8 @@ public class QuestionBank {
 
     private String level;
 
+    private String answer;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

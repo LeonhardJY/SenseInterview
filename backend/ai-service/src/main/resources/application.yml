@@ -9,6 +9,10 @@ spring:
     port: 6379
     database: 0
 
+jwt:
+  secret: REPLACED-JWT-SECRET
+  expiration: 86400000
+
 ai:
   # AI模型配置
   model:

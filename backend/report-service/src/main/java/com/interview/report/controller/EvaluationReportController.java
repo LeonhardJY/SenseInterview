@@ -18,7 +18,7 @@ public class EvaluationReportController {
 
     @Operation(summary = "获取面试报告")
     @GetMapping("/{taskId}")
-    public Result<EvaluationReport> getReportByTaskId(@PathVariable Long taskId) {
+    public Result<EvaluationReport> getReportByTaskId(@PathVariable("taskId") Long taskId) {
         EvaluationReport report = evaluationReportService.findByTaskId(taskId);
         return Result.success(report);
     }

@@ -2,6 +2,7 @@
   <div class="interview-room">
     <div class="room-header">
       <div class="room-info">
+        <button class="btn-back" @click="$router.push('/lobby')">← 返回</button>
         <h2>AI面试房间</h2>
         <el-tag :type="statusType">{{ statusText }}</el-tag>
       </div>
@@ -83,6 +84,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import api from '@/api'
 
 const route = useRoute()
@@ -161,6 +163,16 @@ const sendMessage = async () => {
       answer: userMessage
     })
 
+    if (currentRound.value >= totalRounds.value) {
+      // 已达最大轮数，自动结束面试
+      addMessage('ai', '面试已完成，正在生成评价报告…')
+      await api.post(`/interview/end/${taskId}`)
+      statusType.value = 'success'
+      statusText.value = '已结束'
+      setTimeout(() => { router.push(`/report/${taskId}`) }, 1500)
+      return
+    }
+
     const res = await api.post('/ai/generate-follow-up', null, {
       params: {
         question: currentQuestion.value,
@@ -214,6 +226,23 @@ const endInterview = async () => {
 .room-info h2 {
   font-size: 20px;
   color: #1A1A1A;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #C4C4C4;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  border-color: #C74634;
+  color: #C74634;
 }
 
 .room-content {

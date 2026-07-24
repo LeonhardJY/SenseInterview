@@ -23,28 +23,28 @@ public class AiController {
 
     @Operation(summary = "语音转文本")
     @PostMapping("/speech-to-text")
-    public Result<String> speechToText(@RequestParam String audioUrl) {
+    public Result<String> speechToText(@RequestParam("audioUrl") String audioUrl) {
         String text = asrService.speechToText(audioUrl);
         return Result.success(text);
     }
 
     @Operation(summary = "文本语义分析")
     @PostMapping("/analyze-text")
-    public Result<Map<String, Object>> analyzeText(@RequestParam String text) {
+    public Result<Map<String, Object>> analyzeText(@RequestParam("text") String text) {
         Map<String, Object> result = nlpService.analyzeText(text);
         return Result.success(result);
     }
 
     @Operation(summary = "生成面试问题")
     @PostMapping("/generate-question")
-    public Result<String> generateQuestion(@RequestParam String jobName, @RequestParam String difficulty) {
+    public Result<String> generateQuestion(@RequestParam("jobName") String jobName, @RequestParam("difficulty") String difficulty) {
         String question = llmService.generateQuestion(jobName, difficulty);
         return Result.success(question);
     }
 
     @Operation(summary = "生成追问")
     @PostMapping("/generate-follow-up")
-    public Result<String> generateFollowUp(@RequestParam String question, @RequestParam String answer) {
+    public Result<String> generateFollowUp(@RequestParam("question") String question, @RequestParam("answer") String answer) {
         String followUp = llmService.generateFollowUp(question, answer);
         return Result.success(followUp);
     }

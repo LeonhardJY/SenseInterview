@@ -18,14 +18,14 @@ public class SysUserController {
 
     @Operation(summary = "获取用户信息")
     @GetMapping("/{id}")
-    public Result<SysUser> getUserById(@PathVariable Long id) {
+    public Result<SysUser> getUserById(@PathVariable("id") Long id) {
         SysUser user = sysUserService.getById(id);
         return Result.success(user);
     }
 
     @Operation(summary = "根据用户名获取用户")
     @GetMapping("/username/{username}")
-    public Result<SysUser> getUserByUsername(@PathVariable String username) {
+    public Result<SysUser> getUserByUsername(@PathVariable("username") String username) {
         SysUser user = sysUserService.findByUsername(username);
         return Result.success(user);
     }
