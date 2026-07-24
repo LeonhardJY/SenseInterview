@@ -1,0 +1,45 @@
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build files
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+dist/
+.env.local
+.env.*.local
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Gradle
+.gradle/
+build/
+
+# Misc
+*.tmp
+*.bak
+*.orig
