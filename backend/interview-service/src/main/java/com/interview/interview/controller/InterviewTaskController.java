@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "面试管理", description = "面试相关接口")
 @RestController
 @RequestMapping("/api/interview")
@@ -47,6 +49,13 @@ public class InterviewTaskController {
     public Result<InterviewTask> getTaskById(@PathVariable Long taskId) {
         InterviewTask task = interviewTaskService.getById(taskId);
         return Result.success(task);
+    }
+
+    @Operation(summary = "获取面试列表")
+    @GetMapping("/list")
+    public Result<List<InterviewTask>> getTaskList() {
+        List<InterviewTask> list = interviewTaskService.list();
+        return Result.success(list);
     }
 
     @lombok.Data

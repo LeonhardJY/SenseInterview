@@ -26,5 +26,6 @@ public class SysUser {
     private LocalDateTime createTime;
 
     @TableLogic
+    @TableField(exist = false)
     private Integer deleted;
 }
