@@ -64,7 +64,7 @@ spring:
       database: 0
 
 jwt:
-  secret: your-256-bit-secret-key-here
+  secret: REPLACED-JWT-SECRET
 
 logging:
   level:
