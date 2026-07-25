@@ -1,160 +1,195 @@
 <template>
   <div class="lobby">
     <div class="page-shell">
-      <!-- Left Column -->
-      <aside class="col-left">
-        <div class="panel profile-card">
-          <div class="profile-top">
-            <div class="profile-avatar">{{ userInitial }}</div>
-            <div>
-              <div class="profile-name">{{ username }}</div>
-              <div class="profile-sub">{{ role === 'ADMIN' ? '管理员' : '普通用户' }} · {{ interviewCount }} 场面试</div>
+      <!-- 左侧栏 -->
+      <aside class="sidebar">
+        <div class="sidebar-card profile-card">
+          <div class="profile-avatar">{{ userInitial }}</div>
+          <div class="profile-name">{{ username }}</div>
+          <div class="profile-role">{{ role === 'ADMIN' ? '管理员' : '普通用户' }}</div>
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ interviewCount }}</span>
+              <span class="stat-label">面试</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">{{ avgScore }}</span>
+              <span class="stat-label">均分</span>
             </div>
           </div>
         </div>
-        <div class="panel quick-links">
-          <div class="quick-list">
-            <div class="quick-item" @click="$router.push('/history')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              我的面试
-              <span class="qi-badge">{{ interviewCount }}</span>
-            </div>
-            <div class="quick-item" @click="$router.push('/resume')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><path d="M9 15l10-10 4 4-10 10H9v-4z"/></svg>
+
+        <div class="sidebar-card">
+          <nav class="sidebar-nav">
+            <a class="nav-item active" @click="$router.push('/lobby')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+              面试大厅
+            </a>
+            <a class="nav-item" @click="$router.push('/resume')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
               我的简历
-            </div>
-            <div class="quick-item" @click="$router.push('/question-bank')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3l-6.16 3.24 1.18-6.88L2 8.9l6.92-1L12 1.5l3.08 6.4 6.92 1-5.02 4.76 1.18 6.88z"/></svg>
+            </a>
+            <a class="nav-item" @click="$router.push('/question-bank')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
               面试题库
-            </div>
-          </div>
+            </a>
+            <a class="nav-item" @click="$router.push('/history')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              练习记录
+            </a>
+          </nav>
         </div>
-        <button class="btn-create-room" @click="showCreateModal = true">
+
+        <button class="create-btn" @click="showCreateModal = true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          创建面试房间
+          开始面试
         </button>
       </aside>
 
-      <!-- Center Column -->
-      <main class="col-center">
-        <div class="panel toolbar">
+      <!-- 中间内容 -->
+      <main class="content">
+        <!-- 搜索和筛选 -->
+        <div class="search-card">
           <div class="search-row">
             <div class="search-input-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input type="text" class="search-input" v-model="searchQuery" placeholder="按岗位方向或关键词搜索，如「前端」「Java」">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" class="search-input" v-model="searchQuery" placeholder="搜索岗位方向...">
             </div>
-            <button class="btn-quick-match" @click="quickMatch">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            <button class="quick-match-btn" @click="quickMatch">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
               快速匹配
             </button>
           </div>
-          <div class="filter-groups">
+
+          <div class="filter-row">
             <div class="filter-group">
-              <span class="fg-label">方向</span>
-              <button v-for="d in directions" :key="d" class="chip" :class="{ active: filterDirection === d }" @click="filterDirection = d">{{ d }}</button>
+              <span class="filter-label">方向</span>
+              <button v-for="d in directions" :key="d" class="filter-chip" :class="{ active: filterDirection === d }" @click="filterDirection = d">{{ d }}</button>
             </div>
             <div class="filter-group">
-              <span class="fg-label">难度</span>
-              <button v-for="l in levels" :key="l" class="chip" :class="{ active: filterLevel === l }" @click="filterLevel = l">{{ l }}</button>
+              <span class="filter-label">难度</span>
+              <button v-for="l in levels" :key="l" class="filter-chip" :class="{ active: filterLevel === l }" @click="filterLevel = l">{{ l }}</button>
             </div>
           </div>
         </div>
 
+        <!-- 岗位列表 -->
         <div class="list-header">
-          <div class="lh-left">
-            <h2>岗位列表</h2>
-            <span class="lh-count">共 {{ filteredJobs.length }} 个岗位</span>
+          <h2 class="list-title">岗位列表</h2>
+          <span class="list-count">{{ filteredJobs.length }} 个岗位</span>
+        </div>
+
+        <div class="job-grid">
+          <div v-for="job in filteredJobs" :key="job.id" class="job-card" @click="startInterview(job)">
+            <div class="job-card-header">
+              <span class="job-mode">AI 对练</span>
+              <span class="level-tag" :class="'level-' + (job.level || 'MEDIUM').toLowerCase()">{{ levelText(job.level) }}</span>
+            </div>
+            <h3 class="job-name">{{ job.name }}</h3>
+            <p class="job-desc">{{ job.description }}</p>
+            <div class="job-footer">
+              <span class="job-category">{{ job.category }}</span>
+              <span class="job-arrow">→</span>
+            </div>
           </div>
         </div>
 
-        <div class="room-container">
-          <div v-for="job in filteredJobs" :key="job.id" class="room-card">
-            <div class="rc-top">
-              <span class="mode-tag">AI 对练</span>
-              <span class="tag-pill">
-                <span class="diff-dot" :class="diffDot[job.level]"></span>
-                {{ levelText(job.level) }}
-              </span>
-            </div>
-            <div class="rc-title">{{ job.name }}</div>
-            <div class="rc-tags">
-              <span class="tag-pill">{{ job.category }}</span>
-            </div>
-            <div class="rc-bottom">
-              <span class="rc-desc">{{ job.description }}</span>
-              <button class="btn-join" @click="startInterview(job)">开始面试</button>
-            </div>
-          </div>
+        <div v-if="filteredJobs.length === 0" class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <p>没有找到匹配的岗位</p>
         </div>
       </main>
 
-      <!-- Right Column -->
-      <aside class="col-right">
-        <div class="panel">
-          <div class="panel-header"><h3>本周练习统计</h3></div>
-          <div class="stat-numbers">
-            <div class="stat-box"><div class="sv">{{ interviewCount }}</div><div class="sl">总场次</div></div>
-            <div class="stat-box"><div class="sv">{{ avgScore }}</div><div class="sl">平均得分</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-header"><h3>热门题库推荐</h3></div>
-          <div class="recommend-list">
-            <div class="recommend-item" v-for="(item, index) in hotQuestions" :key="index">
-              <div class="rec-rank">{{ index + 1 }}</div>
-              <div class="rec-body">
-                <div class="rn">{{ item.name }}</div>
-                <div class="rc-meta">{{ item.count }} 人练习过</div>
+      <!-- 右侧栏 -->
+      <aside class="sidebar-right">
+        <div class="sidebar-card">
+          <h3 class="card-title">热门题库</h3>
+          <div class="hot-list">
+            <div v-for="(item, index) in hotQuestions" :key="index" class="hot-item">
+              <span class="hot-rank" :class="{ top: index < 3 }">{{ index + 1 }}</span>
+              <div class="hot-info">
+                <span class="hot-name">{{ item.name }}</span>
+                <span class="hot-count">{{ item.count }} 人练习</span>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="sidebar-card">
+          <h3 class="card-title">平台数据</h3>
+          <div class="platform-stats">
+            <div class="platform-stat">
+              <span class="platform-value">1,284</span>
+              <span class="platform-label">在线用户</span>
+            </div>
+            <div class="platform-stat">
+              <span class="platform-value">5,672</span>
+              <span class="platform-label">面试总数</span>
+            </div>
+            <div class="platform-stat">
+              <span class="platform-value">82.5</span>
+              <span class="platform-label">平均分</span>
+            </div>
+          </div>
+        </div>
       </aside>
     </div>
 
-    <!-- Create Room Modal -->
-    <div class="modal-overlay" :class="{ open: showCreateModal }" @click.self="showCreateModal = false">
-      <div class="modal-box">
-        <h3>创建面试房间</h3>
-        <p class="modal-sub">设置面试信息后即可开始AI模拟面试</p>
-        <el-form :model="createForm" label-width="80px">
-          <el-form-item label="岗位方向">
-            <el-select v-model="createForm.jobName" placeholder="请选择岗位" style="width:100%">
-              <el-option v-for="job in jobs" :key="job.id" :label="job.name" :value="job.name" />
-            </el-select>
-          </el-form-item>
-          <el-row :gutter="12">
-            <el-col :span="12">
-              <el-form-item label="难度">
-                <el-select v-model="createForm.difficulty" style="width:100%">
-                  <el-option label="简单" value="EASY" />
-                  <el-option label="中等" value="MEDIUM" />
-                  <el-option label="困难" value="HARD" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="模式">
-                <el-select v-model="createForm.mode" style="width:100%">
-                  <el-option label="文字面试" value="TEXT" />
-                  <el-option label="语音面试" value="VOICE" />
-                  <el-option label="视频面试" value="VIDEO" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-        <div class="modal-actions">
-          <button class="btn-secondary" @click="showCreateModal = false">取消</button>
-          <button class="btn-primary-modal" @click="createInterview">创建并进入房间</button>
+    <!-- 创建面试弹窗 -->
+    <teleport to="body">
+      <transition name="modal">
+        <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>创建面试</h3>
+              <button class="modal-close" @click="showCreateModal = false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">岗位方向</label>
+                <select class="form-select" v-model="createForm.jobName">
+                  <option value="">请选择岗位</option>
+                  <option v-for="job in jobs" :key="job.id" :value="job.name">{{ job.name }}</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">难度</label>
+                  <select class="form-select" v-model="createForm.difficulty">
+                    <option value="EASY">初级</option>
+                    <option value="MEDIUM">中级</option>
+                    <option value="HARD">高级</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">模式</label>
+                  <select class="form-select" v-model="createForm.mode">
+                    <option value="TEXT">文字面试</option>
+                    <option value="VOICE">语音面试</option>
+                    <option value="VIDEO">视频面试</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline" @click="showCreateModal = false">取消</button>
+              <button class="btn btn-primary" @click="createInterview">开始面试</button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </transition>
+    </teleport>
 
-    <div v-if="toast" class="toast show">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-      <span>{{ toastMsg }}</span>
-    </div>
+    <!-- Toast -->
+    <transition name="toast">
+      <div v-if="toast" class="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        {{ toastMsg }}
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -179,15 +214,13 @@ const userInitial = ref((localStorage.getItem('username') || 'U').charAt(0).toUp
 
 const directions = ['全部', '前端开发', 'Java后端', '算法', '产品经理', '测试开发', '大数据']
 const levels = ['全部', '初级', '中级', '高级']
-const diffDot = { EASY: 'd1', MEDIUM: 'd2', HARD: 'd3' }
+const levelMap = { '初级': 'EASY', '中级': 'MEDIUM', '高级': 'HARD' }
 const levelText = (l) => ({ EASY: '初级', MEDIUM: '中级', HARD: '高级' }[l] || l)
 
 const jobs = ref([])
 const hotQuestions = ref([])
 
 const createForm = ref({ jobName: '', difficulty: 'MEDIUM', mode: 'TEXT' })
-
-const levelMap = { '初级': 'EASY', '中级': 'MEDIUM', '高级': 'HARD' }
 
 const filteredJobs = computed(() => {
   return jobs.value.filter(job => {
@@ -216,120 +249,736 @@ const loadHotQuestions = async () => {
   try { const res = await api.get('/hot/list'); hotQuestions.value = res.data || [] } catch (e) {}
 }
 
-const showToast = (msg) => { toastMsg.value = msg; toast.value = true; setTimeout(() => { toast.value = false }, 2600) }
+const showToast = (msg) => {
+  toastMsg.value = msg
+  toast.value = true
+  setTimeout(() => { toast.value = false }, 2600)
+}
 
-const startInterview = (job) => { createForm.value.jobName = job.name; showCreateModal.value = true }
+const startInterview = (job) => {
+  createForm.value.jobName = job.name
+  showCreateModal.value = true
+}
 
 const createInterview = async () => {
-  if (!createForm.value.jobName) { showToast('请选择岗位方向'); return }
+  if (!createForm.value.jobName) {
+    showToast('请选择岗位方向')
+    return
+  }
   try {
-    const res = await api.post('/interview/create', { userId: 1, jobName: createForm.value.jobName, mode: createForm.value.mode, difficulty: createForm.value.difficulty })
-    showCreateModal.value = false; router.push(`/interview/${res.data.id}`)
-  } catch (e) { showToast('创建失败，请重试') }
+    const res = await api.post('/interview/create', {
+      userId: parseInt(localStorage.getItem('userId') || '1'),
+      jobName: createForm.value.jobName,
+      mode: createForm.value.mode,
+      difficulty: createForm.value.difficulty
+    })
+    showCreateModal.value = false
+    router.push(`/interview/${res.data.id}`)
+  } catch (e) {
+    showToast('创建失败，请重试')
+  }
 }
 
 const quickMatch = () => {
   const picked = jobs.value[Math.floor(Math.random() * jobs.value.length)]
-  showToast('正在匹配岗位…')
-  setTimeout(() => { createForm.value.jobName = picked.name; showCreateModal.value = true }, 500)
+  createForm.value.jobName = picked.name
+  showCreateModal.value = true
 }
 </script>
 
 <style scoped>
-.lobby { max-width: 1400px; margin: 0 auto; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-.page-shell { display: grid; grid-template-columns: 248px minmax(0,1fr) 296px; gap: 20px; align-items: start; }
-.panel { background: #fff; border: 1px solid #E8E8E8; border-radius: 4px; }
-.panel-header { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; }
-.panel-header h3 { font-size: 14px; font-weight: normal; color: #1A1A1A; }
+.lobby {
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-/* Left */
-.col-left { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 76px; }
-.profile-card { padding: 20px 16px; }
-.profile-top { display: flex; align-items: center; gap: 12px; }
-.profile-avatar { width: 46px; height: 46px; border-radius: 50%; background: #C74634; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-.profile-name { font-size: 15px; color: #1A1A1A; }
-.profile-sub { font-family: sans-serif; font-size: 12px; color: #767676; margin-top: 2px; }
-.quick-list { padding: 6px; }
-.quick-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 4px; font-size: 13px; color: #404040; cursor: pointer; transition: background 0.2s; }
-.quick-item:hover { background: #F5F5F5; }
-.quick-item svg { width: 16px; height: 16px; color: #767676; flex-shrink: 0; }
-.qi-badge { margin-left: auto; font-family: sans-serif; font-size: 10px; color: #C74634; background: #FBEEEC; padding: 1px 6px; border-radius: 999px; }
-.btn-create-room { width: 100%; padding: 13px 14px; background: #C74634; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-.btn-create-room:hover { background: #A83A2B; }
-.btn-create-room svg { width: 16px; height: 16px; }
+.page-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr 280px;
+  gap: var(--space-5);
+  align-items: start;
+}
 
-/* Center */
-.col-center { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.toolbar { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.search-row { display: flex; gap: 10px; }
-.search-input-wrap { position: relative; flex: 1; }
-.search-input-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9E9E9E; }
-.search-input { width: 100%; height: 42px; padding: 0 14px 0 36px; border: 1px solid #C4C4C4; border-radius: 4px; font-size: 13px; color: #1A1A1A; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-.search-input::placeholder { color: #9E9E9E; }
-.search-input:focus { border-color: #C74634; box-shadow: 0 0 0 3px rgba(199,70,52,0.12); }
-.btn-quick-match { flex-shrink: 0; height: 42px; padding: 0 18px; background: #fff; color: #C74634; border: 1px solid #C74634; border-radius: 4px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 7px; white-space: nowrap; transition: all 0.2s; }
-.btn-quick-match:hover { background: #C74634; color: #fff; }
-.btn-quick-match svg { width: 15px; height: 15px; }
-.filter-groups { display: flex; flex-wrap: wrap; gap: 20px 28px; }
-.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.fg-label { font-family: sans-serif; font-size: 11px; color: #767676; }
-.chip { font-family: sans-serif; font-size: 12px; color: #5C5C5C; background: #fff; border: 1px solid #C4C4C4; padding: 5px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-.chip:hover { border-color: #767676; }
-.chip.active { background: #1A1A1A; border-color: #1A1A1A; color: #fff; }
-.list-header { display: flex; align-items: center; justify-content: space-between; }
-.lh-left { display: flex; align-items: baseline; gap: 8px; }
-.lh-left h2 { font-size: 16px; font-weight: normal; color: #1A1A1A; }
-.lh-count { font-family: sans-serif; font-size: 12px; color: #767676; }
-.room-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-.room-card { background: #fff; border: 1px solid #E8E8E8; border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: all 0.2s; }
-.room-card:hover { border-color: #C74634; box-shadow: 0 4px 14px rgba(0,0,0,0.06); transform: translateY(-1px); }
-.rc-top { display: flex; align-items: center; justify-content: space-between; }
-.mode-tag { font-family: sans-serif; font-size: 11px; color: #5C5C5C; border: 1px solid #C4C4C4; padding: 3px 9px; border-radius: 4px; }
-.tag-pill { font-family: sans-serif; font-size: 11px; color: #5C5C5C; background: #F5F5F5; padding: 3px 9px; border-radius: 4px; display: flex; align-items: center; gap: 5px; }
-.diff-dot { width: 6px; height: 6px; border-radius: 50%; }
-.diff-dot.d1 { background: #2E7D32; }
-.diff-dot.d2 { background: #E65100; }
-.diff-dot.d3 { background: #C62828; }
-.rc-title { font-size: 15px; color: #1A1A1A; }
-.rc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.rc-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid #F5F5F5; }
-.rc-desc { font-family: sans-serif; font-size: 12px; color: #767676; }
-.btn-join { font-family: sans-serif; font-size: 12px; padding: 7px 16px; border-radius: 4px; border: none; cursor: pointer; background: #C74634; color: #fff; transition: background 0.2s; }
-.btn-join:hover { background: #A83A2B; }
+/* 侧边栏 */
+.sidebar {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
 
-/* Right */
-.col-right { display: flex; flex-direction: column; gap: 16px; }
-.stat-numbers { display: flex; padding: 4px 16px 16px; gap: 10px; }
-.stat-box { flex: 1; text-align: center; padding: 10px 4px; background: #F5F5F5; border-radius: 4px; }
-.sv { font-size: 20px; color: #1A1A1A; font-family: sans-serif; font-weight: 600; }
-.sl { font-size: 11px; color: #767676; margin-top: 3px; font-family: sans-serif; }
-.recommend-list { padding: 4px 6px 10px; }
-.recommend-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-.recommend-item:hover { background: #F5F5F5; }
-.rec-rank { flex-shrink: 0; width: 22px; height: 22px; border-radius: 4px; background: #1A1A1A; color: #fff; font-family: sans-serif; font-size: 11px; display: flex; align-items: center; justify-content: center; }
-.recommend-item:first-child .rec-rank { background: #C74634; }
-.rec-body { flex: 1; min-width: 0; }
-.rn { font-size: 13px; color: #2D2D2D; }
-.rc-meta { font-family: sans-serif; font-size: 11px; color: #767676; margin-top: 1px; }
+.sidebar-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
 
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(26,26,26,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-.modal-overlay.open { display: flex; }
-.modal-box { background: #fff; width: 100%; max-width: 440px; border-radius: 6px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
-.modal-box h3 { font-size: 18px; color: #1A1A1A; margin-bottom: 4px; font-weight: normal; }
-.modal-sub { font-family: sans-serif; font-size: 13px; color: #9E9E9E; margin-bottom: 22px; }
-.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-.btn-secondary { flex: 1; height: 42px; background: #fff; color: #404040; border: 1px solid #C4C4C4; border-radius: 4px; font-size: 14px; cursor: pointer; }
-.btn-secondary:hover { background: #F5F5F5; }
-.btn-primary-modal { flex: 1.4; height: 42px; background: #C74634; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
-.btn-primary-modal:hover { background: #A83A2B; }
+.profile-card {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 auto var(--space-3);
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.profile-role {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: var(--space-4);
+}
+
+.profile-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-color);
+}
+
+/* 侧边栏导航 */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--gray-600);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: var(--gray-50);
+  color: var(--gray-900);
+}
+
+.nav-item.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 创建按钮 */
+.create-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.create-btn:hover {
+  background: var(--primary-dark);
+}
+
+.create-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 中间内容 */
+.content {
+  min-width: 0;
+}
+
+/* 搜索卡片 */
+.search-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.search-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.search-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--gray-400);
+}
+
+.search-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 16px 0 40px;
+  font-size: 14px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  background: var(--gray-50);
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.search-input::placeholder {
+  color: var(--gray-400);
+}
+
+.quick-match-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 42px;
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.quick-match-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.quick-match-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 筛选 */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filter-label {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-right: 4px;
+}
+
+.filter-chip {
+  padding: 5px 14px;
+  font-size: 13px;
+  color: var(--gray-600);
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filter-chip:hover {
+  border-color: var(--gray-300);
+}
+
+.filter-chip.active {
+  background: var(--gray-900);
+  border-color: var(--gray-900);
+  color: white;
+}
+
+/* 列表头部 */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.list-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.list-count {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* 岗位网格 */
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.job-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.job-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.job-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.job-mode {
+  font-size: 12px;
+  color: var(--gray-500);
+  padding: 2px 8px;
+  background: var(--gray-100);
+  border-radius: 4px;
+}
+
+.level-tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.level-easy { color: var(--level-easy); background: var(--level-easy-bg); }
+.level-medium { color: var(--level-medium); background: var(--level-medium-bg); }
+.level-hard { color: var(--level-hard); background: var(--level-hard-bg); }
+
+.job-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 6px;
+}
+
+.job-desc {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: var(--space-3);
+}
+
+.job-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-color);
+}
+
+.job-category {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.job-arrow {
+  font-size: 14px;
+  color: var(--gray-400);
+  transition: var(--transition);
+}
+
+.job-card:hover .job-arrow {
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+/* 右侧栏 */
+.sidebar-right {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 热门题库 */
+.hot-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hot-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+}
+
+.hot-item:hover {
+  background: var(--gray-50);
+}
+
+.hot-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hot-rank.top {
+  background: var(--primary);
+  color: white;
+}
+
+.hot-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hot-name {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hot-count {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+/* 平台数据 */
+.platform-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.platform-stat {
+  text-align: center;
+  padding: var(--space-3);
+  background: var(--gray-50);
+  border-radius: var(--border-radius-sm);
+}
+
+.platform-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.platform-label {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--gray-400);
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-3);
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+/* 弹窗 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.modal-body {
+  padding: var(--space-5);
+}
+
+.form-group {
+  margin-bottom: var(--space-4);
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: 6px;
+}
+
+.form-select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  background: white;
+  color: var(--gray-900);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-color);
+  justify-content: flex-end;
+}
 
 /* Toast */
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1A1A1A; color: #fff; padding: 13px 18px; border-radius: 4px; font-family: sans-serif; font-size: 13px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform 0.25s, opacity 0.25s; z-index: 200; border-left: 3px solid #C74634; }
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast svg { width: 16px; height: 16px; color: #6FCF73; flex-shrink: 0; }
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-900);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+}
 
-@media (max-width: 1180px) { .page-shell { grid-template-columns: 1fr; max-width: 720px; } }
-@media (max-width: 720px) { .room-container { grid-template-columns: 1fr; } }
+.toast svg {
+  width: 18px;
+  height: 18px;
+  color: var(--success);
+}
+
+/* 动画 */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 20px);
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .page-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .sidebar-right {
+    position: static;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-card {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .create-btn {
+    width: auto;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .job-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-row {
+    flex-direction: column;
+  }
+
+  .quick-match-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>

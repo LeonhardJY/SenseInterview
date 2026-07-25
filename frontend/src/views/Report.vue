@@ -1,62 +1,74 @@
 <template>
-  <div class="report">
-    <div class="report-header">
-      <div class="ph-left">
-        <button class="btn-back" @click="$router.push('/lobby')">← 返回</button>
-        <h1>面试报告</h1>
+  <div class="report-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="btn btn-ghost btn-back" @click="$router.push('/lobby')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          返回
+        </button>
+        <div>
+          <h1 class="page-title">面试报告</h1>
+          <p class="page-subtitle">面试表现分析与评价</p>
+        </div>
       </div>
     </div>
 
     <div class="report-content">
+      <!-- 评分卡片 -->
       <div class="score-card">
-        <div class="total-score">
-          <div class="score-circle">
+        <div class="score-circle">
+          <div class="score-inner">
             <span class="score-number">{{ report.totalScore || 0 }}</span>
             <span class="score-label">综合评分</span>
           </div>
         </div>
-
         <div class="score-details">
           <div class="score-item">
-            <span class="label">专业能力</span>
-            <el-progress :percentage="report.professionalScore || 0" :stroke-width="8" />
+            <div class="score-item-header">
+              <span class="score-item-label">专业能力</span>
+              <span class="score-item-value">{{ report.professionalScore || 0 }}</span>
+            </div>
+            <div class="score-bar"><div class="score-bar-fill" :style="{ width: (report.professionalScore || 0) + '%' }"></div></div>
           </div>
           <div class="score-item">
-            <span class="label">表达能力</span>
-            <el-progress :percentage="report.communicationScore || 0" :stroke-width="8" />
+            <div class="score-item-header">
+              <span class="score-item-label">表达能力</span>
+              <span class="score-item-value">{{ report.communicationScore || 0 }}</span>
+            </div>
+            <div class="score-bar"><div class="score-bar-fill" :style="{ width: (report.communicationScore || 0) + '%' }"></div></div>
           </div>
           <div class="score-item">
-            <span class="label">逻辑能力</span>
-            <el-progress :percentage="report.logicScore || 0" :stroke-width="8" />
+            <div class="score-item-header">
+              <span class="score-item-label">逻辑能力</span>
+              <span class="score-item-value">{{ report.logicScore || 0 }}</span>
+            </div>
+            <div class="score-bar"><div class="score-bar-fill" :style="{ width: (report.logicScore || 0) + '%' }"></div></div>
           </div>
         </div>
       </div>
 
+      <!-- 总结 -->
       <div class="detail-card">
-        <h3>面试总结</h3>
-        <p>{{ report.summary || '暂无总结' }}</p>
+        <h3 class="detail-title">面试总结</h3>
+        <p class="detail-text">{{ report.summary || '暂无总结' }}</p>
       </div>
 
+      <!-- 建议 -->
       <div class="detail-card">
-        <h3>改进建议</h3>
-        <p>{{ report.suggestion || '暂无建议' }}</p>
+        <h3 class="detail-title">改进建议</h3>
+        <p class="detail-text">{{ report.suggestion || '暂无建议' }}</p>
       </div>
 
-      <div class="detail-card">
-        <h3>面试记录</h3>
+      <!-- 面试记录 -->
+      <div class="detail-card" v-if="records.length > 0">
+        <h3 class="detail-title">面试记录</h3>
         <div class="record-list">
-          <div
-            v-for="(record, index) in records"
-            :key="index"
-            class="record-item"
-          >
+          <div v-for="(record, index) in records" :key="index" class="record-item">
             <div class="record-round">第 {{ index + 1 }} 轮</div>
             <div class="record-content">
-              <div class="question">
-                <strong>问题：</strong>{{ record.question }}
-              </div>
-              <div class="answer">
-                <strong>回答：</strong>{{ record.answer }}
+              <div class="record-question">
+                <span class="record-label">问题</span>
+                <p>{{ record.question }}</p>
               </div>
             </div>
           </div>
@@ -87,181 +99,67 @@ const loadReport = async () => {
   try {
     const res = await api.get(`/report/${taskId}`)
     report.value = res.data || {}
-  } catch (error) {
-    console.error(error)
-  }
+  } catch (e) { console.error(e) }
 }
 
 const loadRecords = async () => {
   try {
-    const res = await api.get(`/evaluation/task/${taskId}`)
+    const res = await api.get(`/interview/records/${taskId}`)
     records.value = res.data || []
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const goBack = () => {
-  router.push('/lobby')
+  } catch (e) { console.error(e) }
 }
 </script>
 
 <style scoped>
-.report {
-  padding: 20px;
-}
-
-.report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.ph-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.report-header h1 {
-  font-size: 24px;
-  color: #1A1A1A;
-  margin: 0;
-}
-
-.btn-back {
-  background: none;
-  border: 1px solid #C4C4C4;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-back:hover {
-  border-color: #C74634;
-  color: #C74634;
-}
-
-.report-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
+.report-page { max-width: 800px; margin: 0 auto; }
 
 .score-card {
-  background: #fff;
-  border: 1px solid #E8E8E8;
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 40px;
-}
-
-.total-score {
-  flex-shrink: 0;
+  background: white; border: 1px solid var(--border-color); border-radius: var(--border-radius);
+  padding: var(--space-8); margin-bottom: var(--space-5);
+  display: flex; gap: var(--space-8); align-items: center;
 }
 
 .score-circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #C74634 0%, #E85D4A 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  width: 140px; height: 140px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
 }
 
-.score-number {
-  font-size: 36px;
-  font-weight: bold;
-}
+.score-inner { text-align: center; color: white; }
+.score-number { display: block; font-size: 36px; font-weight: 700; line-height: 1; }
+.score-label { font-size: 13px; opacity: 0.9; }
 
-.score-label {
-  font-size: 12px;
-  opacity: 0.9;
-}
+.score-details { flex: 1; display: flex; flex-direction: column; gap: var(--space-5); }
 
-.score-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-}
+.score-item-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.score-item-label { font-size: 13px; color: var(--gray-600); }
+.score-item-value { font-size: 14px; font-weight: 600; color: var(--gray-900); }
 
-.score-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.score-item .label {
-  width: 80px;
-  font-size: 14px;
-  color: #666;
-}
-
-.score-item .el-progress {
-  flex: 1;
-}
+.score-bar { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+.score-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s ease; }
 
 .detail-card {
-  background: #fff;
-  border: 1px solid #E8E8E8;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 20px;
+  background: white; border: 1px solid var(--border-color); border-radius: var(--border-radius);
+  padding: var(--space-6); margin-bottom: var(--space-5);
 }
 
-.detail-card h3 {
-  font-size: 16px;
-  color: #1A1A1A;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #E8E8E8;
+.detail-title {
+  font-size: 16px; font-weight: 600; color: var(--gray-900);
+  margin-bottom: var(--space-4); padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.detail-card p {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.8;
-}
+.detail-text { font-size: 14px; color: var(--gray-600); line-height: 1.8; }
 
-.record-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+.record-list { display: flex; flex-direction: column; gap: var(--space-3); }
 
 .record-item {
-  background: #F9F9F9;
-  border-radius: 8px;
-  padding: 16px;
+  background: var(--gray-50); border-radius: var(--border-radius-sm); padding: var(--space-4);
 }
 
-.record-round {
-  font-size: 12px;
-  color: #C74634;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
+.record-round { font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: var(--space-2); }
 
-.record-content {
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.question, .answer {
-  margin-bottom: 8px;
-}
-
-.question strong, .answer strong {
-  color: #333;
-}
+.record-label { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; display: block; }
+.record-content p { font-size: 14px; color: var(--gray-700); line-height: 1.6; }
 </style>

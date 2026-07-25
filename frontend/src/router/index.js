@@ -8,12 +8,6 @@ const routes = [
     meta: { title: '登录' }
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: () => import('@/views/Register.vue'),
-    meta: { title: '注册' }
-  },
-  {
     path: '/',
     name: 'Layout',
     component: () => import('@/views/Layout.vue'),
@@ -67,7 +61,7 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  if (to.path !== '/login' && to.path !== '/register' && !token) {
+  if (to.path !== '/login' && !token) {
     next('/login')
   } else {
     next()
