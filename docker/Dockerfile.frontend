@@ -1,20 +1,8 @@
-# 前端Dockerfile - 多阶段构建
-# 阶段1: 构建
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-COPY frontend/package*.json ./
-RUN npm install
-
-COPY frontend/ .
-RUN npm run build
-
-# 阶段2: 运行
+# 前端Dockerfile - 直接用nginx托管已构建的文件
 FROM nginx:alpine
 
-# 复制构建产物
-COPY --from=builder /app/dist /usr/share/nginx/html
+# 复制构建产物（假设已执行 npm run build）
+COPY frontend/dist /usr/share/nginx/html
 
 # 复制nginx配置
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf

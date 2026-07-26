@@ -1,5 +1,5 @@
 # Java微服务通用Dockerfile
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
@@ -9,4 +9,5 @@ COPY backend/${SERVICE_NAME}/target/${SERVICE_NAME}-1.0.0.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 绑定到所有网络接口
+ENTRYPOINT ["java", "-Dserver.address=0.0.0.0", "-jar", "app.jar"]
