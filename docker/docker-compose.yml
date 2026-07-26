@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # ============ 基础服务 ============
+  mysql:
+    image: mysql:8.0
+    container_name: ai-interview-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: ai_interview
+      MYSQL_CHARSET: utf8mb4
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../docs/database/ai_interview.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-interview-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # ============ 后端服务 ============
+  user-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.java
+      args:
+        SERVICE_NAME: user-service
+    container_name: ai-interview-user
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_REDIS_HOST: redis
+      JWT_SECRET: REPLACED-JWT-SECRET
+    depends_on:
+      - mysql
+      - redis
+
+  interview-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.java
+      args:
+        SERVICE_NAME: interview-service
+    container_name: ai-interview-interview
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_REDIS_HOST: redis
+      JWT_SECRET: REPLACED-JWT-SECRET
+    depends_on:
+      - mysql
+      - redis
+
+  question-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.java
+      args:
+        SERVICE_NAME: question-service
+    container_name: ai-interview-question
+    restart: always
+    ports:
+      - "8083:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_REDIS_HOST: redis
+      JWT_SECRET: REPLACED-JWT-SECRET
+    depends_on:
+      - mysql
+      - redis
+
+  ai-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.java
+      args:
+        SERVICE_NAME: ai-service
+    container_name: ai-interview-ai
+    restart: always
+    ports:
+      - "8086:8080"
+    environment:
+      SPRING_REDIS_HOST: redis
+      JWT_SECRET: REPLACED-JWT-SECRET
+    depends_on:
+      - redis
+
+  # ============ 前端 ============
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: ai-interview-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - interview-service
+      - question-service
+      - ai-service
+
+volumes:
+  mysql-data:
+  redis-data:
