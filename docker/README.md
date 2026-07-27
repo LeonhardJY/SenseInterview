@@ -75,12 +75,46 @@ dir dist\
 
 ### 方式一：使用 docker-compose（推荐）
 
+[//]: # (后端镜像构建)
+# user-service
+docker build -t docker-user-service \
+-f docker/Dockerfile.java \
+--build-arg SERVICE_NAME=user-service \
+.
+
+# interview-service
+docker build -t docker-interview-service \
+-f docker/Dockerfile.java \
+--build-arg SERVICE_NAME=interview-service \
+.
+
+# question-service
+docker build -t docker-question-service \
+-f docker/Dockerfile.java \
+--build-arg SERVICE_NAME=question-service \
+.
+
+# ai-service
+docker build -t docker-ai-service \
+-f docker/Dockerfile.java \
+--build-arg SERVICE_NAME=ai-service \
+.
+
+[//]: # (前端镜像构建)
+docker build -t docker-frontend \
+-f docker/Dockerfile.frontend \
+.
+
+
+
 ```bash
 cd D:\java\item\mock-Interview\docker
 
 # 一键启动所有服务
 docker-compose up -d --build
 ```
+
+
 
 查看启动状态：
 ```bash
