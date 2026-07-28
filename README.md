@@ -58,10 +58,29 @@ frontend/
 
 - Java 17+
 - Node.js 18+
-- Python 3.10+
+- Python 3.10+（运行 DeepFace 情绪识别时需要）
 - MySQL 8.0
 - Redis
-- DeepSeek API Key
+- DeepSeek API Key（获取地址：https://platform.deepseek.com/api_keys）
+
+### API Key 配置
+
+系统通过环境变量 `SENSE_LLM_KEY` 读取 DeepSeek API Key，可按以下方式配置：
+
+```bash
+# Windows（全局生效）
+setx SENSE_LLM_KEY sk-your-deepseek-api-key-here
+
+# Linux / Mac（临时生效，关闭终端后失效）
+export SENSE_LLM_KEY=sk-your-deepseek-api-key-here
+
+# Linux / Mac（永久生效）
+echo 'export SENSE_LLM_KEY=sk-your-deepseek-api-key-here' >> ~/.bashrc
+```
+
+IDEA 用户可在启动配置中设置：`Run` → `Edit Configurations` → `Environment variables` 添加 `SENSE_LLM_KEY=your-key`。
+
+> 注意：API Key 已从代码仓库中移除，配置文件中的 `${SENSE_LLM_KEY:sk-placeholder}` 会读取环境变量，未设置时使用占位值 `sk-placeholder` 会导致 LLM 调用失败。
 
 ### 启动步骤
 
@@ -70,9 +89,7 @@ frontend/
 git clone https://github.com/LeonhardJY/SenseInterview.git
 cd SenseInterview
 
-# 2. 配置环境变量
-#    Windows: setx SENSE_LLM_KEY sk-your-deepseek-api-key
-#    Linux/Mac: export SENSE_LLM_KEY=sk-your-deepseek-api-key
+# 2. 配置 API Key（见上方说明）
 
 # 3. 启动 MySQL 和 Redis
 
