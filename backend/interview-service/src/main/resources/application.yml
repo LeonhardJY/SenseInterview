@@ -36,7 +36,7 @@ ai:
   model:
     llm:
       provider: deepseek
-      api-key: sk-REMOVED-DEEPSEEK-KEY  # ← 换成你的DeepSeek API Key
+      api-key: ${AI_LLM_API_KEY:sk-placeholder}
       api-url: https://api.deepseek.com
       model: deepseek-chat
 

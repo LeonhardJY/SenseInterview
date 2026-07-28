@@ -31,7 +31,7 @@ ai:
     # LLM大语言模型配置 (DeepSeek)
     llm:
       provider: deepseek
-      api-key: sk-REMOVED-DEEPSEEK-KEY
+      api-key: ${AI_LLM_API_KEY:sk-placeholder}
       api-url: https://api.deepseek.com
       model: deepseek-v4-flash
 
