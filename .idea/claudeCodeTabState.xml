@@ -7,11 +7,10 @@
           <value>
             <TabSessionState>
               <option name="provider" value="claude" />
-              <option name="sessionId" value="c96949c9-7283-444d-ae4e-21617ea0d6a4" />
-              <option name="cwd" value="D:\java\item\mock-Interview" />
+              <option name="sessionId" value="0d70ea18-a4bf-4239-9d83-ff15f930bcfa" />
+              <option name="cwd" value="C:\Users\Ya Jiang\Desktop\Mock-Interview" />
               <option name="model" value="claude-sonnet-4-6[1m]" />
-              <option name="permissionMode" value="default" />
-              <option name="reasoningEffort" value="high" />
+              <option name="permissionMode" value="acceptEdits" />
             </TabSessionState>
           </value>
         </entry>

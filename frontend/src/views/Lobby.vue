@@ -4,9 +4,9 @@
       <!-- 左侧栏 -->
       <aside class="sidebar">
         <div class="sidebar-card profile-card">
-          <div class="profile-avatar">{{ userInitial }}</div>
-          <div class="profile-name">{{ username }}</div>
-          <div class="profile-role">{{ role === 'ADMIN' ? '管理员' : '普通用户' }}</div>
+          <div class="profile-avatar">{{ userStore.userInitial }}</div>
+          <div class="profile-name">{{ userStore.username }}</div>
+          <div class="profile-role">{{ userStore.isAdmin ? '管理员' : '普通用户' }}</div>
           <div class="profile-stats">
             <div class="stat-item">
               <span class="stat-value">{{ interviewCount }}</span>
@@ -22,19 +22,19 @@
 
         <div class="sidebar-card">
           <nav class="sidebar-nav">
-            <a class="nav-item active" @click="$router.push('/lobby')">
+            <a class="nav-item" :class="{ active: currentPath === '/lobby' }" @click="$router.push('/lobby')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
               面试大厅
             </a>
-            <a class="nav-item" @click="$router.push('/resume')">
+            <a class="nav-item" :class="{ active: currentPath === '/resume' }" @click="$router.push('/resume')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
               我的简历
             </a>
-            <a class="nav-item" @click="$router.push('/question-bank')">
+            <a class="nav-item" :class="{ active: currentPath === '/question-bank' }" @click="$router.push('/question-bank')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
               面试题库
             </a>
-            <a class="nav-item" @click="$router.push('/history')">
+            <a class="nav-item" :class="{ active: currentPath === '/history' }" @click="$router.push('/history')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               练习记录
             </a>
@@ -159,9 +159,9 @@
                 <div class="form-group">
                   <label class="form-label">难度</label>
                   <select class="form-select" v-model="createForm.difficulty">
-                    <option value="EASY">初级</option>
-                    <option value="MEDIUM">中级</option>
-                    <option value="HARD">高级</option>
+                    <option value="初级">初级</option>
+                    <option value="中级">中级</option>
+                    <option value="高级">高级</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -195,11 +195,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store'
+import { levelText } from '@/utils/constants'
 import api from '@/api'
 
+const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
+
+// 当前路由路径，用于导航高亮
+const currentPath = computed(() => route.path)
 const showCreateModal = ref(false)
 const searchQuery = ref('')
 const filterDirection = ref('全部')
@@ -208,24 +215,20 @@ const interviewCount = ref(0)
 const avgScore = ref(82)
 const toast = ref(false)
 const toastMsg = ref('')
-const username = ref(localStorage.getItem('username') || '用户')
-const role = ref(localStorage.getItem('userRole') || 'USER')
-const userInitial = ref((localStorage.getItem('username') || 'U').charAt(0).toUpperCase())
 
-const directions = ['全部', '前端开发', 'Java后端', '算法', '产品经理', '测试开发', '大数据']
+const directions = ['全部', '前端开发', '后端开发', '移动开发', '数据', '测试', '运维', '产品', '设计']
 const levels = ['全部', '初级', '中级', '高级']
-const levelMap = { '初级': 'EASY', '中级': 'MEDIUM', '高级': 'HARD' }
-const levelText = (l) => ({ EASY: '初级', MEDIUM: '中级', HARD: '高级' }[l] || l)
+// levelText 从 '@/utils/constants' 导入
 
 const jobs = ref([])
 const hotQuestions = ref([])
 
-const createForm = ref({ jobName: '', difficulty: 'MEDIUM', mode: 'TEXT' })
+const createForm = ref({ jobName: '', difficulty: '中级', mode: 'TEXT' })
 
 const filteredJobs = computed(() => {
   return jobs.value.filter(job => {
     if (filterDirection.value !== '全部' && job.category !== filterDirection.value) return false
-    if (filterLevel.value !== '全部' && job.level !== levelMap[filterLevel.value]) return false
+    if (filterLevel.value !== '全部' && levelText(job.level) !== filterLevel.value) return false
     if (searchQuery.value && !job.name.includes(searchQuery.value) && !job.category.includes(searchQuery.value)) return false
     return true
   })
@@ -235,18 +238,31 @@ onMounted(() => {
   loadInterviewCount()
   loadJobs()
   loadHotQuestions()
+
+  // 检查是否从简历页面跳转过来
+  if (route.query.fromResume === 'true') {
+    const jobName = route.query.jobName
+    if (jobName) {
+      createForm.value.jobName = jobName
+      showCreateModal.value = true
+      ElMessage.info(`已自动填充岗位：${jobName}`)
+    }
+  }
 })
 
 const loadInterviewCount = async () => {
-  try { const res = await api.get('/interview/list'); interviewCount.value = res.data?.length || 0 } catch (e) {}
+  try {
+    const res = await api.get('/interview/list', { params: { userId: userStore.userId } })
+    interviewCount.value = res.data?.length || 0
+  } catch (e) { console.warn('加载面试次数失败:', e) }
 }
 
 const loadJobs = async () => {
-  try { const res = await api.get('/job/list'); jobs.value = res.data || [] } catch (e) {}
+  try { const res = await api.get('/job/list'); jobs.value = res.data || [] } catch (e) { console.warn('加载岗位列表失败:', e) }
 }
 
 const loadHotQuestions = async () => {
-  try { const res = await api.get('/hot/list'); hotQuestions.value = res.data || [] } catch (e) {}
+  try { const res = await api.get('/hot/list'); hotQuestions.value = res.data || [] } catch (e) { console.warn('加载热门题库失败:', e) }
 }
 
 const showToast = (msg) => {
@@ -267,7 +283,7 @@ const createInterview = async () => {
   }
   try {
     const res = await api.post('/interview/create', {
-      userId: parseInt(localStorage.getItem('userId') || '1'),
+      userId: userStore.userId,
       jobName: createForm.value.jobName,
       mode: createForm.value.mode,
       difficulty: createForm.value.difficulty

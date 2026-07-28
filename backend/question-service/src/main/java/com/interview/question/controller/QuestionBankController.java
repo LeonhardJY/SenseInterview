@@ -59,4 +59,29 @@ public class QuestionBankController {
         questionBankService.removeById(id);
         return Result.success();
     }
+
+    // ========== 管理员接口 ==========
+
+    @Operation(summary = "获取题库统计")
+    @GetMapping("/stats")
+    public Result<QuestionStats> getQuestionStats() {
+        long totalQuestions = questionBankService.count();
+        long javaQuestions = questionBankService.lambdaQuery().eq(QuestionBank::getCategory, "后端开发").count();
+        long frontendQuestions = questionBankService.lambdaQuery().eq(QuestionBank::getCategory, "前端开发").count();
+
+        QuestionStats stats = new QuestionStats();
+        stats.setTotalQuestions(totalQuestions);
+        stats.setJavaQuestions(javaQuestions);
+        stats.setFrontendQuestions(frontendQuestions);
+        stats.setOtherQuestions(totalQuestions - javaQuestions - frontendQuestions);
+        return Result.success(stats);
+    }
+
+    @lombok.Data
+    public static class QuestionStats {
+        private Long totalQuestions;
+        private Long javaQuestions;
+        private Long frontendQuestions;
+        private Long otherQuestions;
+    }
 }

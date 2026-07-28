@@ -17,7 +17,7 @@ spring:
         - id: interview-service
           uri: http://localhost:8082
           predicates:
-            - Path=/api/interview/**
+            - Path=/api/interview/**,/api/report/**,/api/job/**,/api/hot/**,/api/evaluation/**
           filters:
             - StripPrefix=0
 
@@ -48,6 +48,12 @@ spring:
             - Path=/api/ai/**
           filters:
             - StripPrefix=0
+
+        # WebSocket — 面试房间实时通信
+        - id: interview-ws
+          uri: ws://localhost:8082
+          predicates:
+            - Path=/ws/**
 
       globalcors:
         corsConfigurations:

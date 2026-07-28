@@ -53,7 +53,7 @@ export default defineConfig({
         changeOrigin: true
       },
       '/ws': {
-        target: 'ws://localhost:8086',
+        target: 'ws://localhost:8080',
         ws: true
       }
     }

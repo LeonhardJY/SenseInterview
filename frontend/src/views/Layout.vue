@@ -16,10 +16,10 @@
       </div>
       <div class="header-right">
         <div class="user-dropdown" @click="showMenu = !showMenu">
-          <div class="user-avatar">{{ userInitial }}</div>
+          <div class="user-avatar">{{ userStore.userInitial }}</div>
           <div class="user-info">
-            <span class="user-name">{{ username }}</span>
-            <span class="user-role">{{ role === 'ADMIN' ? '管理员' : '用户' }}</span>
+            <span class="user-name">{{ userStore.username }}</span>
+            <span class="user-role">{{ userStore.isAdmin ? '管理员' : '用户' }}</span>
           </div>
           <svg class="dropdown-arrow" :class="{ open: showMenu }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 9l6 6 6-6"/>
@@ -29,10 +29,10 @@
         <transition name="dropdown">
           <div v-if="showMenu" class="dropdown-menu">
             <div class="dropdown-header">
-              <div class="dropdown-avatar">{{ userInitial }}</div>
+              <div class="dropdown-avatar">{{ userStore.userInitial }}</div>
               <div>
-                <div class="dropdown-name">{{ username }}</div>
-                <div class="dropdown-role">{{ role === 'ADMIN' ? '管理员' : '普通用户' }}</div>
+                <div class="dropdown-name">{{ userStore.username }}</div>
+                <div class="dropdown-role">{{ userStore.isAdmin ? '管理员' : '普通用户' }}</div>
               </div>
             </div>
             <div class="dropdown-divider"></div>
@@ -43,6 +43,10 @@
             <a class="dropdown-item" @click="navigate('/history')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               练习记录
+            </a>
+            <a v-if="userStore.isAdmin" class="dropdown-item" @click="navigate('/admin')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              管理后台
             </a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item danger" @click="handleLogout">
@@ -62,12 +66,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/store'
 
 const router = useRouter()
+const userStore = useUserStore()
 const showMenu = ref(false)
-const username = ref(localStorage.getItem('username') || '用户')
-const role = ref(localStorage.getItem('userRole') || 'USER')
-const userInitial = ref((localStorage.getItem('username') || 'U').charAt(0).toUpperCase())
 
 const navigate = (path) => {
   showMenu.value = false
@@ -75,10 +78,7 @@ const navigate = (path) => {
 }
 
 const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userId')
-  localStorage.removeItem('username')
-  localStorage.removeItem('userRole')
+  userStore.logout()
   router.push('/login')
 }
 </script>

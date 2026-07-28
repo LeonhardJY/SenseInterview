@@ -25,6 +25,13 @@ public class ResumeController {
         return Result.success(list);
     }
 
+    @Operation(summary = "获取用户默认简历")
+    @GetMapping("/default/{userId}")
+    public Result<Resume> getDefaultResume(@PathVariable("userId") Long userId) {
+        Resume resume = resumeService.findDefaultByUserId(userId);
+        return Result.success(resume);
+    }
+
     @Operation(summary = "获取简历详情")
     @GetMapping("/{id}")
     public Result<Resume> getResumeById(@PathVariable("id") Long id) {
@@ -44,6 +51,13 @@ public class ResumeController {
     public Result<Resume> updateResume(@RequestBody Resume resume) {
         Resume updated = resumeService.updateResume(resume);
         return Result.success(updated);
+    }
+
+    @Operation(summary = "设置默认简历")
+    @PutMapping("/set-default/{id}")
+    public Result<Void> setDefaultResume(@PathVariable("id") Long id) {
+        resumeService.setDefaultResume(id);
+        return Result.success();
     }
 
     @Operation(summary = "删除简历")

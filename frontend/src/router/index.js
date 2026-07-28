@@ -48,6 +48,45 @@ const routes = [
         name: 'QuestionBank',
         component: () => import('@/views/QuestionBank.vue'),
         meta: { title: '面试题库' }
+      },
+      {
+        path: 'admin',
+        name: 'Admin',
+        component: () => import('@/views/admin/Index.vue'),
+        redirect: '/admin/dashboard',
+        meta: { title: '管理后台', requiresAdmin: true },
+        children: [
+          {
+            path: 'dashboard',
+            name: 'AdminDashboard',
+            component: () => import('@/views/admin/Dashboard.vue'),
+            meta: { title: '数据看板' }
+          },
+          {
+            path: 'users',
+            name: 'AdminUsers',
+            component: () => import('@/views/admin/Users.vue'),
+            meta: { title: '用户管理' }
+          },
+          {
+            path: 'questions',
+            name: 'AdminQuestions',
+            component: () => import('@/views/admin/Questions.vue'),
+            meta: { title: '题库管理' }
+          },
+          {
+            path: 'interviews',
+            name: 'AdminInterviews',
+            component: () => import('@/views/admin/Interviews.vue'),
+            meta: { title: '面试记录' }
+          },
+          {
+            path: 'jobs',
+            name: 'AdminJobs',
+            component: () => import('@/views/admin/Jobs.vue'),
+            meta: { title: '岗位管理' }
+          }
+        ]
       }
     ]
   }
@@ -61,11 +100,23 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
+  const userRole = localStorage.getItem('userRole')
+
+  // 未登录跳转登录页
   if (to.path !== '/login' && !token) {
     next('/login')
-  } else {
-    next()
+    return
   }
+
+  // 管理员页面权限检查
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    if (userRole !== 'ADMIN') {
+      next('/lobby')
+      return
+    }
+  }
+
+  next()
 })
 
 export default router

@@ -175,9 +175,7 @@ const handleLogin = async () => {
   try {
     const res = await api.post('/auth/login', loginForm.value)
     userStore.setToken(res.data.token)
-    localStorage.setItem('userId', res.data.userId)
-    localStorage.setItem('username', res.data.username)
-    localStorage.setItem('userRole', res.data.role)
+    userStore.setUser(res.data)   // setUser 会同步存到 localStorage
     router.push('/')
   } catch (error) {
     errorMsg.value = error.message || '登录失败，请检查用户名和密码'

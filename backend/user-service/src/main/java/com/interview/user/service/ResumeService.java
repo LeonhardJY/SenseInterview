@@ -9,9 +9,13 @@ public interface ResumeService extends IService<Resume> {
 
     List<Resume> findByUserId(Long userId);
 
+    Resume findDefaultByUserId(Long userId);
+
     Resume createResume(Resume resume);
 
     Resume updateResume(Resume resume);
+
+    void setDefaultResume(Long id);
 
     void deleteResume(Long id);
 }

@@ -18,11 +18,16 @@
     </div>
 
     <div class="resume-grid">
-      <div v-for="item in resumeList" :key="item.id" class="resume-card">
+      <div v-for="item in resumeList" :key="item.id" class="resume-card" :class="{ default: item.status === 2 }">
         <div class="card-header">
-          <h3 class="card-title">{{ item.title || '未命名简历' }}</h3>
+          <div class="card-title-row">
+            <h3 class="card-title">{{ item.title || '未命名简历' }}</h3>
+            <span v-if="item.status === 2" class="default-badge">默认</span>
+          </div>
           <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" @click="previewResume(item)">预览</button>
             <button class="btn btn-ghost btn-sm" @click="editResume(item)">编辑</button>
+            <button class="btn btn-ghost btn-sm" @click="setDefault(item)" v-if="item.status !== 2">设为默认</button>
             <button class="btn btn-danger btn-sm" @click="deleteResume(item.id)">删除</button>
           </div>
         </div>
@@ -50,8 +55,11 @@
           </div>
         </div>
         <div class="card-footer">
-          <span class="card-time">{{ item.createTime }}</span>
-          <button class="btn btn-primary btn-sm" @click="useResume(item)">使用此简历</button>
+          <span class="card-time">{{ formatDate(item.createTime) }}</span>
+          <button class="btn btn-primary btn-sm" @click="startInterview(item)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/></svg>
+            开始面试
+          </button>
         </div>
       </div>
 
@@ -147,22 +155,90 @@
         </div>
       </transition>
     </teleport>
+
+    <!-- 预览弹窗 -->
+    <teleport to="body">
+      <transition name="modal">
+        <div v-if="showPreviewDialog" class="modal-overlay" @click.self="showPreviewDialog = false">
+          <div class="modal-content modal-lg">
+            <div class="modal-header">
+              <h3>简历预览</h3>
+              <button class="modal-close" @click="showPreviewDialog = false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="modal-body" v-if="previewItem">
+              <div class="preview-section">
+                <div class="preview-header">
+                  <h2 class="preview-name">{{ previewItem.name || '未填写姓名' }}</h2>
+                  <div class="preview-contact">
+                    <span v-if="previewItem.phone">{{ previewItem.phone }}</span>
+                    <span v-if="previewItem.email">{{ previewItem.email }}</span>
+                  </div>
+                </div>
+
+                <div class="preview-block" v-if="previewItem.jobPosition">
+                  <h4 class="block-title">求职意向</h4>
+                  <p>{{ previewItem.jobPosition }}</p>
+                </div>
+
+                <div class="preview-block">
+                  <h4 class="block-title">基本信息</h4>
+                  <div class="info-row">
+                    <span v-if="previewItem.education">学历：{{ previewItem.education }}</span>
+                    <span v-if="previewItem.school">院校：{{ previewItem.school }}</span>
+                    <span v-if="previewItem.major">专业：{{ previewItem.major }}</span>
+                    <span v-if="previewItem.workYears !== null">工作年限：{{ previewItem.workYears }}年</span>
+                  </div>
+                </div>
+
+                <div class="preview-block" v-if="previewItem.skills">
+                  <h4 class="block-title">专业技能</h4>
+                  <div class="skills-row">
+                    <span v-for="skill in previewItem.skills.split(',')" :key="skill" class="skill-tag">{{ skill.trim() }}</span>
+                  </div>
+                </div>
+
+                <div class="preview-block" v-if="previewItem.experience">
+                  <h4 class="block-title">工作经历</h4>
+                  <p class="preview-text">{{ previewItem.experience }}</p>
+                </div>
+
+                <div class="preview-block" v-if="previewItem.selfIntroduction">
+                  <h4 class="block-title">自我介绍</h4>
+                  <p class="preview-text">{{ previewItem.selfIntroduction }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline" @click="showPreviewDialog = false">关闭</button>
+              <button class="btn btn-primary" @click="startInterview(previewItem)">使用此简历开始面试</button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/store'
 import api from '@/api'
 
-const formRef = ref(null)
+const router = useRouter()
+const userStore = useUserStore()
 const resumeList = ref([])
 const showDialog = ref(false)
+const showPreviewDialog = ref(false)
 const isEdit = ref(false)
 const saving = ref(false)
+const previewItem = ref(null)
 
 const defaultForm = () => ({
-  id: null, userId: parseInt(localStorage.getItem('userId') || '1'),
+  id: null, userId: userStore.userId,
   title: '', name: '', phone: '', email: '', education: '', school: '',
   major: '', workYears: 0, jobPosition: '', skills: '', experience: '', selfIntroduction: ''
 })
@@ -173,10 +249,15 @@ onMounted(() => loadResumeList())
 
 const loadResumeList = async () => {
   try {
-    const userId = localStorage.getItem('userId') || '1'
-    const res = await api.get(`/resume/list/${userId}`)
+    const res = await api.get(`/resume/list/${userStore.userId}`)
     resumeList.value = res.data || []
   } catch (e) { console.error(e) }
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('zh-CN')
 }
 
 const showCreateDialog = () => {
@@ -189,6 +270,11 @@ const editResume = (item) => {
   isEdit.value = true
   form.value = { ...item }
   showDialog.value = true
+}
+
+const previewResume = (item) => {
+  previewItem.value = item
+  showPreviewDialog.value = true
 }
 
 const saveResume = async () => {
@@ -206,6 +292,14 @@ const saveResume = async () => {
   } catch (e) { console.error(e) } finally { saving.value = false }
 }
 
+const setDefault = async (item) => {
+  try {
+    await api.put(`/resume/set-default/${item.id}`)
+    ElMessage.success('已设为默认简历')
+    loadResumeList()
+  } catch (e) { ElMessage.error('设置失败') }
+}
+
 const deleteResume = async (id) => {
   try {
     await ElMessageBox.confirm('确定要删除这份简历吗？', '确认删除', { type: 'warning' })
@@ -215,7 +309,17 @@ const deleteResume = async (id) => {
   } catch (e) { if (e !== 'cancel') console.error(e) }
 }
 
-const useResume = (item) => { ElMessage.success(`已选择简历：${item.title || item.name}`) }
+const startInterview = (item) => {
+  // 跳转到面试大厅，并传递简历信息
+  router.push({
+    path: '/lobby',
+    query: {
+      resumeId: item.id,
+      jobName: item.jobPosition,
+      fromResume: true
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -444,5 +548,85 @@ const useResume = (item) => { ElMessage.success(`已选择简历：${item.title 
 
 .modal-enter-from, .modal-leave-to {
   opacity: 0;
+}
+
+/* 默认简历样式 */
+.resume-card.default {
+  border-color: var(--primary);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.default-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 预览弹窗样式 */
+.preview-section {
+  padding: var(--space-4);
+}
+
+.preview-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--primary);
+}
+
+.preview-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.preview-contact {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.preview-block {
+  margin-bottom: var(--space-5);
+}
+
+.block-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0 0 var(--space-3) 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.preview-text {
+  font-size: 14px;
+  color: var(--gray-700);
+  line-height: 1.8;
+  white-space: pre-wrap;
 }
 </style>

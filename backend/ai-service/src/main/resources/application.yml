@@ -8,6 +8,11 @@ spring:
     host: localhost
     port: 6379
     database: 0
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 jwt:
   secret: REPLACED-JWT-SECRET
@@ -16,24 +21,33 @@ jwt:
 ai:
   # AI模型配置
   model:
-    # ASR语音识别配置
+    # ASR语音识别配置 (Whisper)
     asr:
-      provider: aliyun
-      app-key: your-app-key
-      access-key-id: your-access-key-id
-      access-key-secret: your-access-key-secret
+      provider: openai
+      api-key: sk-your-openai-api-key
+      api-url: https://api.openai.com
+      model: whisper-1
+      max-file-size: 25MB
     # NLP自然语言处理配置
     nlp:
       provider: aliyun
       app-key: your-app-key
       access-key-id: your-access-key-id
       access-key-secret: your-access-key-secret
-    # LLM大语言模型配置
+    # LLM大语言模型配置 (DeepSeek)
     llm:
-      provider: openai
-      api-key: your-api-key
-      api-url: https://api.openai.com/v1
-      model: gpt-3.5-turbo
+      provider: deepseek
+      api-key: sk-REMOVED-DEEPSEEK-KEY
+      api-url: https://api.deepseek.com
+      model: deepseek-v4-flash
+
+  # 音频上传配置
+  upload:
+    audio-dir: ./uploads/audio
+
+  # 情绪分析服务（DeepFace Python 微服务）
+  emotion:
+    service-url: http://localhost:5000
 
 springdoc:
   api-docs:
