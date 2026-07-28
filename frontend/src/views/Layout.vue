@@ -1,60 +1,43 @@
 <template>
-  <div class="layout">
-    <header class="header">
-      <div class="header-left">
-        <div class="logo" @click="$router.push('/lobby')">
-          <div class="logo-icon">
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand" @click="$router.push('/lobby')">
+          <div class="brand-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <div class="logo-text">
-            <span class="logo-title">AI面试平台</span>
-            <span class="logo-sub">Interview System</span>
+          <div>
+            <div class="brand-name">SenseInterview</div>
+            <div class="brand-sub">AI Mock Interview</div>
           </div>
         </div>
-      </div>
-      <div class="header-right">
-        <div class="user-dropdown" @click="showMenu = !showMenu">
-          <div class="user-avatar">{{ userStore.userInitial }}</div>
-          <div class="user-info">
-            <span class="user-name">{{ userStore.username }}</span>
-            <span class="user-role">{{ userStore.isAdmin ? '管理员' : '用户' }}</span>
+        <div class="topbar-right">
+          <div class="user-trigger" @click="showMenu = !showMenu">
+            <div class="us-avatar">{{ userStore.userInitial }}</div>
+            <span class="us-name">{{ userStore.username }}</span>
+            <svg class="us-chev" :class="{ open: showMenu }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
-          <svg class="dropdown-arrow" :class="{ open: showMenu }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
-        <div v-if="showMenu" class="dropdown-mask" @click="showMenu = false"></div>
-        <transition name="dropdown">
-          <div v-if="showMenu" class="dropdown-menu">
-            <div class="dropdown-header">
-              <div class="dropdown-avatar">{{ userStore.userInitial }}</div>
-              <div>
-                <div class="dropdown-name">{{ userStore.username }}</div>
-                <div class="dropdown-role">{{ userStore.isAdmin ? '管理员' : '普通用户' }}</div>
+          <transition name="drop">
+            <div v-if="showMenu" class="drop-wrap">
+              <div class="drop-mask" @click="showMenu = false"></div>
+              <div class="drop-panel card">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--card-border)">
+                  <div class="drop-avatar">{{ userStore.userInitial }}</div>
+                  <div><div style="font-size:13px;font-weight:600;color:var(--gray-800)">{{ userStore.username }}</div><div style="font-size:11px;color:var(--gray-400)">{{ userStore.isAdmin ? '管理员' : '用户' }}</div></div>
+                </div>
+                <div style="padding:4px">
+                  <div class="drop-item" @click="navigate('/resume')">个人中心</div>
+                  <div class="drop-item" @click="navigate('/history')">练习记录</div>
+                  <div v-if="userStore.isAdmin" class="drop-item" @click="navigate('/admin')">管理后台</div>
+                  <div style="height:1px;background:var(--card-border);margin:4px 0"></div>
+                  <div class="drop-item" style="color:var(--gray-500)" @click="handleLogout">退出登录</div>
+                </div>
               </div>
             </div>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" @click="navigate('/resume')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-              个人中心
-            </a>
-            <a class="dropdown-item" @click="navigate('/history')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              练习记录
-            </a>
-            <a v-if="userStore.isAdmin" class="dropdown-item" @click="navigate('/admin')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-              管理后台
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item danger" @click="handleLogout">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-              退出登录
-            </a>
-          </div>
-        </transition>
+          </transition>
+        </div>
       </div>
     </header>
     <main class="main">
@@ -68,273 +51,53 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store'
 
-const router = useRouter()
-const userStore = useUserStore()
+const router = useRouter(); const userStore = useUserStore()
 const showMenu = ref(false)
-
-const navigate = (path) => {
-  showMenu.value = false
-  router.push(path)
-}
-
-const handleLogout = () => {
-  userStore.logout()
-  router.push('/login')
-}
+const navigate = (p) => { showMenu.value = false; router.push(p) }
+const handleLogout = () => { userStore.logout(); router.push('/login') }
 </script>
 
 <style scoped>
-.layout {
-  min-height: 100vh;
-  background: var(--bg-page);
+.shell { min-height:100vh; background:var(--bg) }
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background:white; border-bottom:1px solid var(--card-border)
 }
-
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: 64px;
-  background: white;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-6);
+.topbar-inner {
+  display:flex; align-items:center; justify-content:space-between;
+  height:56px; padding:0 28px; max-width:1100px; margin:0 auto
 }
+.brand { display:flex; align-items:center; gap:10px; cursor:pointer }
+.brand-icon { width:28px; height:28px; color:var(--accent) }
+.brand-icon svg { width:100%; height:100% }
+.brand-name { font-size:15px; font-weight:700; color:var(--primary); letter-spacing:-0.02em; line-height:1.2 }
+.brand-sub { font-size:10px; color:var(--gray-400); letter-spacing:0.05em; text-transform:uppercase }
 
-.header-left {
-  display: flex;
-  align-items: center;
+.topbar-right { position:relative }
+.user-trigger {
+  display:flex; align-items:center; gap:8px;
+  padding:4px 10px 4px 4px; border-radius:var(--radius-pill);
+  cursor:pointer; transition:var(--transition)
 }
+.user-trigger:hover { background:var(--gray-50) }
+.us-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600 }
+.us-name { font-size:13px; font-weight:500; color:var(--gray-700) }
+.us-chev { width:12px; height:12px; color:var(--gray-400); transition:transform 0.2s }
+.us-chev.open { transform:rotate(180deg) }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: var(--transition);
-}
+.drop-mask { position:fixed; inset:0; z-index:198 }
+.drop-panel { position:absolute; top:calc(100% + 8px); right:0; width:200px; z-index:199; padding:4px }
+.drop-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600 }
+.drop-item { padding:9px 14px; font-size:13px; color:var(--gray-600); border-radius:10px; cursor:pointer; transition:var(--transition) }
+.drop-item:hover { background:var(--accent-light); color:var(--accent) }
 
-.logo:hover {
-  opacity: 0.8;
-}
+.main { padding:24px 28px; min-height:calc(100vh - 56px) }
 
-.logo-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
+.drop-enter-active,.drop-leave-active { transition:all 0.2s ease }
+.drop-enter-from,.drop-leave-to { opacity:0; transform:translateY(-8px) }
 
-.logo-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.logo-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--gray-900);
-  line-height: 1.2;
-}
-
-.logo-sub {
-  font-size: 11px;
-  color: var(--gray-400);
-  letter-spacing: 0.5px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.user-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.user-dropdown:hover {
-  background: var(--gray-50);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-800);
-  line-height: 1.2;
-}
-
-.user-role {
-  font-size: 11px;
-  color: var(--gray-400);
-}
-
-.dropdown-arrow {
-  width: 16px;
-  height: 16px;
-  color: var(--gray-400);
-  transition: transform 0.2s;
-}
-
-.dropdown-arrow.open {
-  transform: rotate(180deg);
-}
-
-.dropdown-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 220px;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-lg);
-  padding: 8px;
-  z-index: 100;
-}
-
-.dropdown-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-}
-
-.dropdown-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.dropdown-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gray-800);
-}
-
-.dropdown-role {
-  font-size: 12px;
-  color: var(--gray-400);
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: var(--border-color);
-  margin: 4px 0;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  font-size: 13px;
-  color: var(--gray-600);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
-  text-decoration: none;
-}
-
-.dropdown-item:hover {
-  background: var(--gray-50);
-  color: var(--gray-800);
-}
-
-.dropdown-item.danger {
-  color: var(--danger);
-}
-
-.dropdown-item.danger:hover {
-  background: var(--danger-bg);
-}
-
-.dropdown-item svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.main {
-  min-height: calc(100vh - 64px);
-  padding: var(--space-6);
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: all 0.2s ease;
-}
-
-.dropdown-enter-from,
-.dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-@media (max-width: 768px) {
-  .header {
-    padding: 0 var(--space-4);
-  }
-
-  .logo-text {
-    display: none;
-  }
-
-  .user-info {
-    display: none;
-  }
-
-  .main {
-    padding: var(--space-4);
-  }
+@media (max-width:768px) {
+  .main { padding:16px }
+  .topbar-inner { padding:0 16px }
 }
 </style>

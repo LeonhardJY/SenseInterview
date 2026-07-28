@@ -539,192 +539,142 @@ const endInterview = async () => {
 </script>
 
 <style scoped>
-.interview-page { height: calc(100vh - 80px); display: flex; flex-direction: column; }
+/* ── 页面容器 ── */
+.interview-page { height:calc(100vh-80px); display:flex; flex-direction:column; }
 
+/* ── 顶部栏 ── */
 .interview-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: var(--space-4) 0; margin-bottom: var(--space-4);
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; margin-bottom:16px;
+  background:var(--card); border:1px solid var(--card-border);
+  border-radius:var(--radius); box-shadow:var(--shadow)
 }
+.header-left { display:flex; align-items:center; gap:16px }
+.header-info { display:flex; align-items:center; gap:10px }
+.header-info h1 { font-size:16px; font-weight:600; color:var(--gray-800); margin:0 }
 
-.header-left { display: flex; align-items: center; gap: var(--space-4); }
-.header-info { display: flex; align-items: center; gap: var(--space-3); }
-.header-info h1 { font-size: 18px; font-weight: 600; color: var(--gray-900); margin: 0; }
+.tag.status {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; font-size:11px; font-weight:500; border-radius:var(--radius-pill)
+}
+.tag.status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor }
 
-.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; font-size: 12px; font-weight: 500; border-radius: 9999px; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.status-badge.running { color: var(--primary); background: var(--primary-bg); }
-.status-badge.finished { color: var(--success); background: var(--success-bg); }
+/* ── 主内容区 ── */
+.interview-content { flex:1; display:flex; gap:16px; overflow:hidden; }
 
-.interview-content { flex: 1; display: flex; gap: var(--space-4); overflow: hidden; }
+/* ── 聊天区域 ── */
+.chat-area {
+  flex:1; display:flex; flex-direction:column;
+  background:var(--card); border:1px solid var(--card-border);
+  border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden
+}
+.chat-messages { flex:1; overflow-y:auto; padding:20px }
 
-/* 聊天区域 */
-.chat-area { flex: 1; display: flex; flex-direction: column; background: white; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
-
-.chat-messages { flex: 1; overflow-y: auto; padding: var(--space-5); }
-
+/* 加载中 */
 .loading-first {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: var(--space-12) var(--space-6); color: var(--gray-400); gap: var(--space-4);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 24px; gap:16px
 }
-.loading-first p { font-size: 14px; margin: 0; color: var(--gray-500); }
+.loading-first p { font-size:13px; color:var(--gray-400) }
 .loading-spinner {
-  width: 36px; height: 36px; border: 3px solid var(--gray-200);
-  border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
+  width:32px; height:32px; border:3px solid var(--gray-100);
+  border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite
 }
-.loading-dots span { animation: dotPulse 1.4s infinite; opacity: 0; }
-.loading-dots span:nth-child(1) { animation-delay: 0s; }
-.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotPulse { 0%,60%,100% { opacity: 0; } 30% { opacity: 1; } }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin { to { transform:rotate(360deg) } }
+.loading-dots span { animation:dotPulse 1.4s infinite }
+.loading-dots span:nth-child(2) { animation-delay:0.2s }
+.loading-dots span:nth-child(3) { animation-delay:0.4s }
+@keyframes dotPulse { 0%,60%,100% { opacity:0 } 30% { opacity:1 } }
 
-.message { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); }
-.message.user { flex-direction: row-reverse; }
-
+/* 消息 */
+.message { display:flex; gap:12px; margin-bottom:16px }
+.message.user { flex-direction:row-reverse }
 .message-avatar {
-  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0;
+  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600
 }
-.message-avatar.ai { background: var(--primary-bg); color: var(--primary); }
-.message-avatar.user { background: var(--gray-100); color: var(--gray-600); }
-
-.message-body { max-width: 70%; }
-.message.user .message-body { text-align: right; }
-
+.message-avatar.ai { background:var(--accent-light); color:var(--accent) }
+.message-avatar.user { background:var(--gray-100); color:var(--gray-500) }
+.message-body { max-width:70% }
+.message.user .message-body { text-align:right }
 .message-bubble {
-  padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6;
+  padding:12px 16px; border-radius:14px; font-size:13px; line-height:1.7
 }
-.message-bubble.ai { background: var(--gray-50); color: var(--gray-800); border-bottom-left-radius: 4px; }
-.message-bubble.user { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+.message-bubble.ai { background:var(--gray-50); color:var(--gray-700); border-bottom-left-radius:4px }
+.message-bubble.user { background:var(--accent); color:white; border-bottom-right-radius:4px }
+.message-time { font-size:10px; color:var(--gray-400); margin-top:4px }
 
-.message-time { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
-
-.chat-input { padding: var(--space-4); border-top: 1px solid var(--border-color); display: flex; gap: var(--space-3); align-items: flex-end; }
-
-.input-textarea {
-  flex: 1; height: 80px; padding: 12px; font-size: 14px; font-family: var(--font-sans);
-  border: 1px solid var(--gray-200); border-radius: var(--border-radius-sm); resize: none;
-  background: var(--gray-50); transition: var(--transition);
+/* ── 输入区 ── */
+.chat-input {
+  padding:14px; border-top:1px solid var(--card-border);
+  display:flex; gap:10px; align-items:flex-end
 }
-
-.input-textarea:focus { outline: none; border-color: var(--primary); background: white; }
-
-.send-btn { height: 80px; padding: 0 20px; display: flex; align-items: center; gap: 6px; }
-
-/* 语音工具栏 */
-.input-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
+.input-toolbar { display:flex; align-items:center; gap:8px; margin-bottom:8px }
 
 .voice-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  background: var(--gray-100);
-  color: var(--gray-700);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; font-size:11px; font-weight:500;
+  background:white; color:var(--gray-600);
+  border:1px solid var(--card-border); border-radius:var(--radius-pill);
+  cursor:pointer; transition:var(--transition)
 }
+.voice-btn:hover { background:var(--gray-50); border-color:var(--gray-200) }
+.voice-btn.active { background:var(--rose-light); color:var(--rose); border-color:var(--rose) }
+.voice-btn svg { width:14px; height:14px }
 
-.voice-btn:hover {
-  background: var(--gray-200);
+.voice-status { display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--rose) }
+.voice-dot { width:6px; height:6px; border-radius:50%; background:var(--rose); animation:pulse 1s infinite }
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
+
+.input-textarea {
+  flex:1; height:72px; padding:10px 14px; resize:none;
+  font-size:13px; font-family:var(--font); line-height:1.6;
+  background:var(--gray-50); border:1px solid var(--card-border);
+  border-radius:var(--radius-sm); outline:none; transition:var(--transition)
 }
+.input-textarea:focus { border-color:var(--accent); background:white; box-shadow:0 0 0 3px var(--accent-light) }
 
-.voice-btn.active {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border-color: var(--danger);
+.send-btn {
+  height:72px; padding:0 18px;
+  background:var(--accent); color:white;
+  border:none; border-radius:var(--radius-sm);
+  font-size:13px; font-weight:500; cursor:pointer; transition:var(--transition)
 }
+.send-btn:hover { background:#b45309 }
+.send-btn:disabled { opacity:0.4; cursor:not-allowed }
 
-.voice-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* ── 右侧面板 ── */
+.side-panel { width:280px; display:flex; flex-direction:column; gap:12px }
+.panel-card {
+  background:var(--card); border:1px solid var(--card-border);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:18px
 }
-
-.voice-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.voice-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--danger);
-}
-
-.voice-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--danger);
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* 右侧面板 */
-.side-panel { width: 280px; display: flex; flex-direction: column; gap: var(--space-4); }
-
-.panel-card { background: white; border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: var(--space-5); }
-
 .panel-title {
-  font-size: 13px; font-weight: 600; color: var(--gray-500); text-transform: uppercase;
-  letter-spacing: 0.5px; margin-bottom: var(--space-3);
+  font-size:11px; font-weight:600; color:var(--gray-400);
+  text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px
 }
+.progress-bar { height:6px; background:var(--gray-100); border-radius:100px; overflow:hidden }
+.progress-fill { height:100%; background:var(--accent); border-radius:100px; transition:width 0.3s ease }
+.progress-text { font-size:12px; color:var(--gray-400); margin-top:8px; text-align:center }
+.current-question { font-size:13px; color:var(--gray-700); line-height:1.7 }
+.info-list { display:flex; flex-direction:column; gap:10px }
+.info-row { display:flex; justify-content:space-between; font-size:12px }
+.info-label { color:var(--gray-400) }
+.info-value { color:var(--gray-700); font-weight:500; text-align:right }
+.mode-hint { display:block; font-size:10px; color:var(--accent); margin-top:2px }
 
-.progress-bar { height: 6px; background: var(--gray-100); border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.3s ease; }
-.progress-text { font-size: 13px; color: var(--gray-500); margin-top: var(--space-2); text-align: center; }
-
-.current-question { font-size: 14px; color: var(--gray-700); line-height: 1.6; }
-
-.info-list { display: flex; flex-direction: column; gap: var(--space-3); }
-.info-row { display: flex; justify-content: space-between; font-size: 13px; }
-.info-label { color: var(--gray-500); }
-.info-value { color: var(--gray-800); font-weight: 500; }
-
-.mode-hint {
-  display: block;
-  font-size: 11px;
-  color: var(--success);
-  font-weight: 400;
-  margin-top: 2px;
-}
-
-.panel-camera {
-  padding: 0;
-  overflow: hidden;
-}
-
-/* 浮动摄像头（VIDEO模式） */
+/* ── 浮动摄像头 ── */
 .camera-float {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 999;
-  animation: camSlideIn 0.3s ease;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  animation:camSlideIn 0.3s ease;
+  filter:drop-shadow(0 4px 16px rgba(0,0,0,0.2))
 }
+@keyframes camSlideIn { from { opacity:0; transform:translateY(16px) scale(0.95) } to { opacity:1; transform:translateY(0) scale(1) } }
 
-.camera-float:hover {
-  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.35));
-}
-
-@keyframes camSlideIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.9); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@media (max-width:768px) {
+  .side-panel { display:none }
+  .interview-header { flex-wrap:wrap; gap:8px }
+  .header-info h1 { font-size:14px }
 }
 </style>

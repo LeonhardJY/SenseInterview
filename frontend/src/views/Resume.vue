@@ -323,310 +323,95 @@ const startInterview = (item) => {
 </script>
 
 <style scoped>
-.resume-page { max-width: 1200px; margin: 0 auto; }
+.resume-page { max-width: 960px; margin: 0 auto; }
 
-.resume-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: var(--space-5);
-}
+.resume-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:16px }
 
 .resume-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  transition: var(--transition);
+  background:var(--card); backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border); border-radius:var(--radius);
+  overflow:hidden; transition:var(--transition)
 }
-
-.resume-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
+.resume-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px) }
+.resume-card.default { border-color:var(--primary) }
 
 .resume-card .card-header {
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding:16px 20px; border-bottom:1px solid rgba(0,0,0,0.04);
+  display:flex; justify-content:space-between; align-items:center
 }
+.card-title-row { display:flex; align-items:center; gap:8px }
+.resume-card .card-title { font-size:15px; font-weight:600; color:var(--gray-900) }
 
-.resume-card .card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--gray-900);
-}
+.card-actions { display:flex; gap:8px }
 
-.card-actions {
-  display: flex;
-  gap: var(--space-2);
-}
+.resume-card .card-body { padding:20px }
 
-.resume-card .card-body {
-  padding: var(--space-5);
-}
+.info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px }
+.info-item { display:flex; flex-direction:column; gap:2px }
+.info-label { font-size:12px; color:var(--gray-400) }
+.info-value { font-size:13px; color:var(--gray-800); font-weight:500 }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.info-label {
-  font-size: 12px;
-  color: var(--gray-500);
-}
-
-.info-value {
-  font-size: 14px;
-  color: var(--gray-800);
-}
-
-.skills-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.skill-tag {
-  font-size: 12px;
-  color: var(--gray-600);
-  background: var(--gray-100);
-  padding: 3px 10px;
-  border-radius: 9999px;
-}
+.skills-row { display:flex; flex-wrap:wrap; gap:6px }
+.skill-tag { font-size:12px; color:var(--gray-600); background:rgba(0,0,0,0.04); padding:2px 10px; border-radius:100px }
 
 .resume-card .card-footer {
-  padding: var(--space-3) var(--space-5);
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--gray-50);
+  padding:12px 20px; border-top:1px solid rgba(0,0,0,0.04);
+  display:flex; justify-content:space-between; align-items:center
 }
+.card-time { font-size:12px; color:var(--gray-400) }
 
-.card-time {
-  font-size: 12px;
-  color: var(--gray-400);
-}
+.default-badge { font-size:11px; padding:2px 8px; background:var(--primary-light); color:var(--primary); border-radius:100px; font-weight:500 }
 
-/* 弹窗 */
+/* ── 弹窗 ── */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--space-4);
+  position:fixed; inset:0; background:rgba(0,0,0,0.12); display:flex;
+  align-items:center; justify-content:center; z-index:1000; padding:16px
 }
-
 .modal-content {
-  background: white;
-  border-radius: var(--border-radius-lg);
-  width: 100%;
-  max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  background:var(--card); backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border); border-radius:var(--radius-lg);
+  width:100%; max-width:520px; max-height:90vh; overflow-y:auto
 }
-
-.modal-lg {
-  max-width: 640px;
-}
+.modal-lg { max-width:640px }
 
 .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-5);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px; border-bottom:1px solid rgba(0,0,0,0.04);
+  position:sticky; top:0; z-index:1
 }
+.modal-header h3 { font-size:16px; font-weight:600; color:var(--gray-900) }
+.modal-close { width:28px; height:28px; border:none; background:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-400) }
+.modal-close:hover { background:rgba(0,0,0,0.04); color:var(--gray-600) }
+.modal-close svg { width:16px; height:16px }
 
-.modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--gray-900);
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-400);
-  transition: var(--transition);
-}
-
-.modal-close:hover {
-  background: var(--gray-100);
-  color: var(--gray-600);
-}
-
-.modal-close svg {
-  width: 18px;
-  height: 18px;
-}
-
-.modal-body {
-  padding: var(--space-5);
-}
-
-.form-group {
-  margin-bottom: var(--space-4);
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-700);
-  margin-bottom: 6px;
-}
-
+.modal-body { padding:20px }
+.form-group { margin-bottom:16px }
+.form-label { display:block; font-size:13px; font-weight:500; color:var(--gray-700); margin-bottom:6px }
 .form-input, .form-select, .form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  color: var(--gray-900);
-  transition: var(--transition);
-  font-family: var(--font-sans);
+  width:100%; padding:10px 12px; font-size:13px; font-family:var(--font);
+  background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.3);
+  border-radius:var(--radius-sm); outline:none; transition:var(--transition)
 }
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--primary-soft); box-shadow:0 0 0 4px var(--primary-light); background:white }
+.form-textarea { resize:vertical; min-height:80px; line-height:1.5 }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px }
 
 .modal-footer {
-  display: flex;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--border-color);
-  justify-content: flex-end;
-  position: sticky;
-  bottom: 0;
-  background: white;
+  display:flex; gap:12px; justify-content:flex-end;
+  padding:16px 20px; border-top:1px solid rgba(0,0,0,0.04);
+  position:sticky; bottom:0
 }
 
-.modal-enter-active, .modal-leave-active {
-  transition: opacity 0.2s ease;
-}
+.modal-enter-active,.modal-leave-active { transition:opacity 0.2s ease }
+.modal-enter-from,.modal-leave-to { opacity:0 }
 
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
-}
-
-/* 默认简历样式 */
-.resume-card.default {
-  border-color: var(--primary);
-}
-
-.card-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.default-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: var(--primary-bg);
-  color: var(--primary);
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* 预览弹窗样式 */
-.preview-section {
-  padding: var(--space-4);
-}
-
-.preview-header {
-  text-align: center;
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-4);
-  border-bottom: 2px solid var(--primary);
-}
-
-.preview-name {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--gray-900);
-  margin: 0 0 var(--space-2) 0;
-}
-
-.preview-contact {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-4);
-  font-size: 14px;
-  color: var(--gray-600);
-}
-
-.preview-block {
-  margin-bottom: var(--space-5);
-}
-
-.block-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--primary);
-  margin: 0 0 var(--space-3) 0;
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.info-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  font-size: 14px;
-  color: var(--gray-700);
-}
-
-.preview-text {
-  font-size: 14px;
-  color: var(--gray-700);
-  line-height: 1.8;
-  white-space: pre-wrap;
-}
+/* ── 预览 ── */
+.preview-section { padding:16px }
+.preview-header { text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid var(--primary) }
+.preview-name { font-size:22px; font-weight:600; color:var(--gray-900); margin-bottom:8px }
+.preview-contact { display:flex; justify-content:center; gap:16px; font-size:13px; color:var(--gray-600) }
+.preview-block { margin-bottom:20px }
+.preview-block .block-title { font-size:14px; font-weight:600; color:var(--primary); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.04) }
+.info-row { display:flex; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--gray-700) }
+.preview-text { font-size:13px; color:var(--gray-700); line-height:1.8; white-space:pre-wrap }
 </style>
