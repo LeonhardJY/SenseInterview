@@ -36,7 +36,7 @@ ai:
   model:
     llm:
       provider: deepseek
-      api-key: ${AI_LLM_API_KEY:sk-placeholder}
+      api-key: ${SENSE_LLM_KEY:sk-placeholder}
       api-url: https://api.deepseek.com
       model: deepseek-chat
 
