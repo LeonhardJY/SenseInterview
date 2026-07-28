@@ -27,23 +27,6 @@ public class AiController {
     private final LlmService llmService;
     private final FaceAnalysisService faceAnalysisService;
 
-    @Operation(summary = "语音转文本（上传音频文件）")
-    @PostMapping(value = "/speech-to-text", consumes = "multipart/form-data")
-    public Result<String> speechToText(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return Result.error("音频文件不能为空");
-        }
-        String text = asrService.speechToText(file);
-        return Result.success(text);
-    }
-
-    @Operation(summary = "语音转文本（从URL，已废弃）", deprecated = true)
-    @PostMapping("/speech-to-text-url")
-    public Result<String> speechToTextFromUrl(@RequestParam("audioUrl") String audioUrl) {
-        String text = asrService.speechToText(audioUrl);
-        return Result.success(text);
-    }
-
     @Operation(summary = "文本语义分析")
     @PostMapping("/analyze-text")
     public Result<Map<String, Object>> analyzeText(@RequestParam("text") String text) {
@@ -96,8 +79,9 @@ public class AiController {
 
     @Operation(summary = "流式生成面试问题（SSE逐字推送）")
     @PostMapping(value = "/generate-question-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamGenerateQuestion(@RequestParam("jobName") String jobName,
-                                              @RequestParam("difficulty") String difficulty) {
+    public SseEmitter streamGenerateQuestion(@RequestBody Map<String, String> params) {
+        String jobName = params.getOrDefault("jobName", "Java开发");
+        String difficulty = params.getOrDefault("difficulty", "中级");
         SseEmitter emitter = new SseEmitter(180000L);
         llmService.streamGenerateQuestion(emitter, jobName, difficulty);
         return emitter;

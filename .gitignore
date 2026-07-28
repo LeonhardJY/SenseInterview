@@ -84,3 +84,8 @@ dist/
 *.tmp
 *.bak
 *.orig
+
+# Python
+__pycache__/
+*.pyc
+.deepface/

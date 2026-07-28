@@ -25,6 +25,12 @@
       <!-- 聊天区域 -->
       <div class="chat-area">
         <div class="chat-messages" ref="chatContainer">
+          <!-- 面试官出题中... -->
+          <div v-if="isFirstLoading" class="loading-first">
+            <div class="loading-spinner"></div>
+            <p>面试官正在出题中<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>
+          </div>
+
           <div v-for="(msg, index) in messages" :key="index" class="message" :class="msg.type">
             <div class="message-avatar" :class="msg.type">
               {{ msg.type === 'ai' ? 'AI' : '我' }}
@@ -40,9 +46,9 @@
           <div class="input-toolbar">
             <button
               class="btn btn-icon voice-btn"
-              :class="{ active: listeningMode !== 'none', disabled: !speechSupported && !audioRecorderSupported }"
+              :class="{ active: listeningMode === 'browser', disabled: !speechSupported }"
               @click="toggleVoice"
-              :title="listeningMode !== 'none' ? '停止录音' : '开始语音输入'"
+              :title="listeningMode === 'browser' ? '停止录音' : '开始语音输入'"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
@@ -50,21 +56,17 @@
                 <line x1="12" y1="19" x2="12" y2="23"/>
                 <line x1="8" y1="23" x2="16" y2="23"/>
               </svg>
-              {{ listeningMode !== 'none' ? '停止' : (isUploading ? '识别中' : '语音') }}
+              {{ listeningMode === 'browser' ? '停止' : '语音' }}
             </button>
-            <span v-if="listeningMode !== 'none'" class="voice-status">
+            <span v-if="listeningMode === 'browser'" class="voice-status">
               <span class="voice-dot"></span>
-              {{ listeningMode === 'whisper' ? '录音中...' : '正在识别...' }}
-            </span>
-            <span v-if="isUploading" class="voice-status">
-              <span class="voice-dot"></span>
-              上传识别中...
+              正在识别...
             </span>
           </div>
           <textarea
             v-model="inputMessage"
             class="input-textarea"
-            :placeholder="listeningMode === 'browser' ? '正在识别语音...' : (listeningMode === 'whisper' ? '录音中，点击停止后识别...' : '请输入您的回答... (Ctrl+Enter 发送)')"
+            :placeholder="listeningMode === 'browser' ? '正在识别语音...' : '请输入您的回答... (Ctrl+Enter 发送)'"
             @keydown.ctrl.enter="sendMessage"
           ></textarea>
           <button class="btn btn-primary send-btn" @click="sendMessage" :disabled="!inputMessage.trim() || sending">
@@ -127,14 +129,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, computed, onMounted, nextTick, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store'
 import api from '@/api'
 import CameraFeed from '@/components/CameraFeed.vue'
 import { createSpeechRecognition, isSpeechRecognitionSupported } from '@/utils/speechRecognition'
-import { createAudioRecorder, isAudioRecordingSupported } from '@/utils/audioRecorder'
 import { createInterviewSocket } from '@/utils/websocket'
 import { fetchStream } from '@/utils/sse'
 import { modeText } from '@/utils/constants'
@@ -160,15 +161,15 @@ const progress = ref(20)
 const ws = ref(null)
 const wsConnected = ref(false)
 
+// 首次加载
+const isFirstLoading = ref(true)
+
 // 语音识别相关
 const speechSupported = ref(isSpeechRecognitionSupported())
-const listeningMode = ref('none') // 'none' | 'browser' | 'whisper'
+const listeningMode = ref('none') // 'none' | 'browser'
 const speechRecognition = ref(null)
 
-// Whisper 录音相关
-const audioRecorderSupported = ref(isAudioRecordingSupported())
-const audioRecorder = ref(null)
-const isUploading = ref(false)
+// 语音输入使用浏览器原生 API
 
 // 摄像头（VIDEO 模式）
 const cameraRef = ref(null)
@@ -187,25 +188,25 @@ onMounted(async () => {
   await loadInterviewInfo()
   await loadFirstQuestion()
   initSpeechRecognition()
-  initAudioRecorder()
 
-  // 3. 根据面试模式自动启用对应功能
+  // 3. 兜底：第一个 AI 消息有内容了 → 收起加载动画
+  //（避免 onDone 回调链路问题导致 spinner 卡死）
+  const stopLoadingWatch = watch(messages, (msgs) => {
+    const aiMsg = msgs.find(m => m.type === 'ai')
+    if (aiMsg?.content && isFirstLoading.value) {
+      isFirstLoading.value = false
+    }
+  }, { deep: true })
+
+  // 4. 根据面试模式自动启用对应功能
   setTimeout(() => {
-    if (isVoiceMode.value) {
-      // VOICE / VIDEO 模式：自动激活语音输入
-      if (speechSupported.value) {
-        startBrowserVoice()
-      } else if (audioRecorderSupported.value) {
-        ElMessage.info('模式：语音面试，请点击麦克风按钮开始说话')
-      }
+    if (isVoiceMode.value && speechSupported.value) {
+      startBrowserVoice()
     }
-    if (isVideoMode.value) {
-      // VIDEO 模式：自动开启摄像头
-      if (cameraRef.value) {
-        cameraRef.value.startCamera()
-      }
+    if (isVideoMode.value && cameraRef.value) {
+      cameraRef.value.startCamera()
     }
-  }, 500) // 留 0.5s 给 DOM 渲染
+  }, 500)
 })
 
 onUnmounted(() => {
@@ -218,9 +219,7 @@ onUnmounted(() => {
     speechRecognition.value.stop()
   }
   // 清理录音器
-  if (audioRecorder.value) {
-    audioRecorder.value.destroy()
-  }
+  // 清理录音资源（浏览器语音识别已停止，无需额外清理）
 })
 
 // ========== 摄像头（VIDEO 模式） ==========
@@ -313,39 +312,17 @@ const initSpeechRecognition = () => {
   speechRecognition.value = createSpeechRecognition()
 }
 
-/**
- * 初始化 Whisper 录音器
- */
-const initAudioRecorder = () => {
-  if (!audioRecorderSupported.value) return
-  audioRecorder.value = createAudioRecorder()
-}
 
 /**
- * 切换语音输入
- * 优先用浏览器原生识别（即时出结果，不需API Key）
+ * 切换语音输入（浏览器原生 Web Speech API）
  */
-const toggleVoice = async () => {
+const toggleVoice = () => {
   if (listeningMode.value === 'browser') {
     stopBrowserVoice()
-    return
-  }
-  if (listeningMode.value === 'whisper') {
-    await stopWhisperVoice()
-    return
-  }
-
-  // 浏览器原生识别最快，优先使用（不需要任何API Key）
-  if (speechSupported.value) {
+  } else if (speechSupported.value) {
     startBrowserVoice()
   } else {
-    // 如果浏览器不支持，也可以直接尝试 Whisper 录音上传
-    if (audioRecorderSupported.value) {
-      ElMessage.info('浏览器不支持实时语音识别，切换到录音上传模式')
-      await startWhisperVoice()
-    } else {
-      ElMessage.warning('当前浏览器不支持语音输入，请使用 Chrome 或更换设备')
-    }
+    ElMessage.warning('当前浏览器不支持语音输入，请使用 Chrome 或 Edge')
   }
 }
 
@@ -396,137 +373,6 @@ const stopBrowserVoice = () => {
   listeningMode.value = 'none'
 }
 
-/**
- * 启动 Whisper 录音上传
- */
-const startWhisperVoice = async () => {
-  if (!audioRecorder.value) {
-    initAudioRecorder()
-    if (!audioRecorder.value) return
-  }
-
-  try {
-    await audioRecorder.value.start()
-    listeningMode.value = 'whisper'
-    ElMessage.info('录音中... 点击停止后开始识别')
-  } catch (e) {
-    listeningMode.value = 'none'
-    ElMessage.error(e.message || '启动录音失败')
-  }
-}
-
-/**
- * 停止 Whisper 录音并上传识别
- * TEXT 模式：转写后填入输入框
- * VOICE/VIDEO 模式：并行转写+LLM，直接流式输出结果
- */
-const stopWhisperVoice = async () => {
-  if (!audioRecorder.value) return
-
-  listeningMode.value = 'none'
-  isUploading.value = true
-
-  try {
-    const audioBlob = await audioRecorder.value.stop()
-    if (!audioBlob) {
-      isUploading.value = false
-      return
-    }
-
-    if (isVoiceMode.value) {
-      // VOICE/VIDEO 模式：并行转写 + LLM 流式输出（P1-2）
-      await sendVoiceAnswerStream(audioBlob)
-    } else {
-      // TEXT 模式：只做转写，填入输入框供审阅
-      ElMessage.info('正在识别语音...')
-      const formData = new FormData()
-      formData.append('file', audioBlob, `recording_${Date.now()}.webm`)
-
-      const res = await api.post('/ai/speech-to-text', formData, {
-        timeout: 30000
-      })
-
-      if (res.data) {
-        inputMessage.value = res.data
-        ElMessage.success('语音识别完成')
-      }
-    }
-  } catch (e) {
-    console.error('[语音] Whisper 识别失败:', e)
-    ElMessage.error('云端语音识别失败，请检查后端 Whisper API Key 配置，或使用文字输入')
-  } finally {
-    isUploading.value = false
-  }
-}
-
-/**
- * 语音回答：转写后立即流式输出，无需用户点击发送
- * 流程：上传音频 → Whisper 转写 → SSE 流式 LLM 输出
- */
-const sendVoiceAnswerStream = async (audioBlob) => {
-  // 1. 上传音频到 Whisper 转写
-  const formData = new FormData()
-  formData.append('file', audioBlob, `recording_${Date.now()}.webm`)
-
-  // 注意：axios 传 FormData 不能手动设 Content-Type，否则丢失 boundary
-  const res = await api.post('/ai/speech-to-text', formData, {
-    timeout: 30000
-  })
-
-  const transcribedText = res?.data || ''
-  if (!transcribedText) {
-    ElMessage.error('语音识别失败，请重试')
-    return
-  }
-
-  // 2. 保存问答记录
-  qaList.value.push({
-    question: currentQuestion.value,
-    answer: transcribedText
-  })
-  addMessage('user', transcribedText)
-
-  // 3. 检查是否所有轮次已完成
-  if (currentRound.value >= totalRounds.value) {
-    addMessage('ai', '面试已完成，正在生成评价报告...')
-    await generateReport()
-    return
-  }
-
-  // 4. SSE 流式输出 LLM 回答
-  const aiMessageIndex = messages.value.length
-  addMessage('ai', '')
-
-  await fetchStream('/api/ai/generate-follow-up-stream', {
-    history: qaList.value.map(qa => ({
-      question: qa.question,
-      answer: qa.answer
-    })),
-    currentQuestion: currentQuestion.value,
-    currentAnswer: transcribedText
-  }, {
-    onDelta: (chunk) => {
-      messages.value[aiMessageIndex].content += chunk
-      scrollToBottom()
-    },
-    onDone: (fullText) => {
-      messages.value[aiMessageIndex].content = fullText
-      currentQuestion.value = fullText
-      currentRound.value++
-      progress.value = Math.min((currentRound.value / totalRounds.value) * 100, 100)
-
-      // 检查是否所有轮次已完成
-      if (currentRound.value >= totalRounds.value) {
-        setTimeout(() => generateReport(), 1000)
-      }
-    },
-    onError: (errorMsg) => {
-      messages.value[aiMessageIndex].content = '(AI回答失败)'
-      ElMessage.error('AI回答失败: ' + errorMsg)
-    }
-  })
-}
-
 const loadInterviewInfo = async () => {
   try {
     const res = await api.get(`/interview/${taskId}`)
@@ -538,15 +384,34 @@ const loadInterviewInfo = async () => {
 }
 
 const loadFirstQuestion = async () => {
+  isFirstLoading.value = true
   try {
-    const res = await api.post('/ai/generate-question', null, {
-      params: { jobName: interviewInfo.value.jobName || 'Java开发', difficulty: interviewInfo.value.difficulty || '中级' }
+    const msgIdx = messages.value.length
+    addMessage('ai', '') // 占位，流式填充
+
+    await fetchStream('/api/ai/generate-question-stream', {
+      jobName: interviewInfo.value.jobName || 'Java开发',
+      difficulty: interviewInfo.value.difficulty || '中级'
+    }, {
+      onDelta: (chunk) => {
+        messages.value[msgIdx].content += chunk
+        scrollToBottom()
+      },
+      onDone: (fullText) => {
+        messages.value[msgIdx].content = fullText
+        currentQuestion.value = fullText
+        isFirstLoading.value = false
+      },
+      onError: (err) => {
+        messages.value[msgIdx].content = '(加载题目失败，请重试)'
+        ElMessage.error('加载面试题目失败: ' + err)
+        isFirstLoading.value = false
+      }
     })
-    currentQuestion.value = res.data
-    addMessage('ai', currentQuestion.value)
   } catch (error) {
     console.error('加载面试题目失败:', error)
     ElMessage.error('加载面试题目失败，请重试')
+    isFirstLoading.value = false
   }
 }
 
@@ -696,6 +561,22 @@ const endInterview = async () => {
 .chat-area { flex: 1; display: flex; flex-direction: column; background: white; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
 
 .chat-messages { flex: 1; overflow-y: auto; padding: var(--space-5); }
+
+.loading-first {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--space-12) var(--space-6); color: var(--gray-400); gap: var(--space-4);
+}
+.loading-first p { font-size: 14px; margin: 0; color: var(--gray-500); }
+.loading-spinner {
+  width: 36px; height: 36px; border: 3px solid var(--gray-200);
+  border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+.loading-dots span { animation: dotPulse 1.4s infinite; opacity: 0; }
+.loading-dots span:nth-child(1) { animation-delay: 0s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse { 0%,60%,100% { opacity: 0; } 30% { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .message { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); }
 .message.user { flex-direction: row-reverse; }

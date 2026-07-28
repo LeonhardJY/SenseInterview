@@ -20,14 +20,8 @@ jwt:
 
 ai:
   # AI模型配置
+  # (ASR 使用浏览器原生 Web Speech API，无需后端配置)
   model:
-    # ASR语音识别配置 (Whisper)
-    asr:
-      provider: openai
-      api-key: sk-your-openai-api-key
-      api-url: https://api.openai.com
-      model: whisper-1
-      max-file-size: 25MB
     # NLP自然语言处理配置
     nlp:
       provider: aliyun

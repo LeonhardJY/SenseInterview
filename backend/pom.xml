@@ -38,6 +38,7 @@
         <hutool.version>5.8.24</hutool.version>
         <knife4j.version>4.3.0</knife4j.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <langchain4j.version>0.33.0</langchain4j.version>
     </properties>
 
     <dependencyManagement>
@@ -117,6 +118,13 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- LangChain4j -->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j</artifactId>
+                <version>${langchain4j.version}</version>
             </dependency>
 
             <!-- Knife4j 接口文档 -->
