@@ -1,14 +1,15 @@
 <template>
-  <div class="users-page">
+  <div class="users-page fade-in">
     <div class="page-header">
-      <h2 class="page-title">用户管理</h2>
-      <div class="page-stats">
-        共 {{ users.length }} 个用户
+      <div>
+        <p class="eyebrow">Admin · 用户</p>
+        <h2>用户管理</h2>
       </div>
+      <p class="page-stats text-sm text-muted">共 {{ users.length }} 个用户</p>
     </div>
 
     <!-- 用户列表 -->
-    <div class="table-card">
+    <div class="card table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -32,22 +33,22 @@
             </td>
             <td>{{ user.email || '-' }}</td>
             <td>
-              <span class="role-tag" :class="user.role?.toLowerCase()">
+              <span class="tag role-tag" :class="user.role?.toLowerCase()">
                 {{ user.role === 'ADMIN' ? '管理员' : '普通用户' }}
               </span>
             </td>
             <td>
-              <span class="status-tag" :class="{ active: user.status === 1, disabled: user.status === 0 }">
+              <span class="status status-tag" :class="{ active: user.status === 1, disabled: user.status === 0 }">
                 {{ user.status === 1 ? '正常' : '禁用' }}
               </span>
             </td>
             <td>{{ formatDate(user.createTime) }}</td>
             <td>
               <div class="action-btns">
-                <button class="btn btn-sm" :class="user.status === 1 ? 'btn-warning' : 'btn-success'" @click="toggleStatus(user)">
+                <button class="btn btn--sm" :class="user.status === 1 ? 'btn--warning' : 'btn--success'" @click="toggleStatus(user)">
                   {{ user.status === 1 ? '禁用' : '启用' }}
                 </button>
-                <button class="btn btn-sm btn-danger" @click="deleteUser(user)" v-if="user.role !== 'ADMIN'">
+                <button class="btn btn--sm btn--danger" @click="deleteUser(user)" v-if="user.role !== 'ADMIN'">
                   删除
                 </button>
               </div>
@@ -139,25 +140,21 @@ const deleteUser = async (user) => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-5);
+  align-items: flex-end;
+  margin-bottom: var(--spacing-5);
 }
 
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--gray-900);
+.page-header .eyebrow {
+  margin-bottom: 2px;
 }
 
-.page-stats {
-  font-size: 13px;
-  color: var(--gray-500);
+.page-header h2 {
+  font-size: 24px;
+  margin: 0;
 }
 
 .table-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  padding: 0;
   overflow: hidden;
 }
 
@@ -170,32 +167,36 @@ const deleteUser = async (user) => {
 .data-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-divider);
   font-size: 13px;
 }
 
 .data-table th {
-  background: var(--gray-50);
+  background: var(--color-surface-subtle);
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--color-text-body);
 }
 
-.data-table tr:hover {
-  background: var(--gray-50);
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-surface-hover);
 }
 
 .user-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .user-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--primary-bg);
-  color: var(--primary);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,92 +204,61 @@ const deleteUser = async (user) => {
   font-weight: 600;
 }
 
-.role-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 12px;
-  border-radius: 4px;
-}
-
 .role-tag.admin {
-  background: var(--primary-bg);
-  color: var(--primary);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
 }
 
 .role-tag.user {
-  background: var(--gray-100);
-  color: var(--gray-600);
-}
-
-.status-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 12px;
-  border-radius: 4px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
 }
 
 .status-tag.active {
-  background: var(--success-bg);
-  color: var(--success);
+  background: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .status-tag.disabled {
-  background: var(--danger-bg);
-  color: var(--danger);
+  background: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .action-btns {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
-.btn {
-  padding: 6px 12px;
-  font-size: 12px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
+.btn--warning {
+  background: #FEF3C7;
+  border-color: transparent;
+  color: #B45309;
 }
 
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 11px;
-}
-
-.btn-warning {
-  background: var(--warning-bg);
-  color: var(--warning);
-}
-
-.btn-warning:hover {
-  background: var(--warning);
+.btn--warning:hover {
+  background: #B45309;
   color: white;
 }
 
-.btn-success {
-  background: var(--success-bg);
-  color: var(--success);
+.btn--success {
+  background: var(--color-success-light);
+  border-color: transparent;
+  color: var(--color-success);
 }
 
-.btn-success:hover {
-  background: var(--success);
+.btn--success:hover {
+  background: var(--color-success);
   color: white;
 }
 
-.btn-danger {
-  background: var(--danger-bg);
-  color: var(--danger);
+.btn--danger {
+  background: var(--color-danger-light);
+  border-color: transparent;
+  color: var(--color-danger);
 }
 
-.btn-danger:hover {
-  background: var(--danger);
+.btn--danger:hover {
+  background: var(--color-danger);
   color: white;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-8);
-  color: var(--gray-400);
 }
 </style>

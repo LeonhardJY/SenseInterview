@@ -1,7 +1,8 @@
 <template>
   <div class="admin-layout">
-    <aside class="admin-sidebar">
+    <aside class="card admin-sidebar">
       <div class="sidebar-header">
+        <p class="eyebrow" style="margin-bottom:2px">Admin</p>
         <h3>管理后台</h3>
       </div>
       <nav class="sidebar-nav">
@@ -43,24 +44,28 @@
 <style scoped>
 .admin-layout {
   display: flex;
-  min-height: calc(100vh - 64px);
-  gap: var(--space-5);
+  min-height: calc(100vh - var(--header-height));
+  gap: var(--spacing-5);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
 }
 
 .admin-sidebar {
   width: 220px;
   flex-shrink: 0;
+  padding: var(--spacing-5);
+  align-self: flex-start;
+  position: sticky;
+  top: calc(var(--header-height) + var(--spacing-6));
 }
 
 .sidebar-header {
-  padding: var(--space-4) 0;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--spacing-4);
 }
-
 .sidebar-header h3 {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--gray-900);
+  color: var(--color-text-primary);
 }
 
 .sidebar-nav {
@@ -73,31 +78,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 10px 12px;
   font-size: 14px;
-  color: var(--gray-600);
-  border-radius: var(--border-radius);
+  color: var(--color-text-body);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   text-decoration: none;
 }
 
 .nav-item:hover {
-  background: var(--gray-50);
-  color: var(--gray-900);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-primary);
 }
 
 .nav-item.active {
-  background: var(--primary-bg);
-  color: var(--primary);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
   font-weight: 500;
 }
 
 .nav-item.back {
-  margin-top: var(--space-4);
-  border-top: 1px solid var(--border-color);
-  padding-top: var(--space-4);
-  color: var(--gray-500);
+  margin-top: var(--spacing-4);
+  border-top: 1px solid var(--color-divider);
+  padding-top: var(--spacing-4);
+  color: var(--color-text-secondary);
 }
 
 .nav-item svg {
@@ -108,5 +113,11 @@
 .admin-content {
   flex: 1;
   min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .admin-layout { flex-direction: column; }
+  .admin-sidebar { width: 100%; position: static; }
+  .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
 }
 </style>

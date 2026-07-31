@@ -1,92 +1,110 @@
 <template>
   <div class="resume-page">
-    <div class="page-header">
-      <div class="page-header-left">
-        <button class="btn btn-ghost btn-back" @click="$router.push('/lobby')">
+    <!-- 页头 hero 色块 -->
+    <div class="resume-hero">
+      <div class="resume-hero-inner">
+        <button class="btn btn--ghost hero-back" @click="$router.push('/lobby')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          返回
+          返回大厅
         </button>
-        <div>
-          <h1 class="page-title">我的简历</h1>
-          <p class="page-subtitle">共 {{ resumeList.length }} 份简历</p>
-        </div>
-      </div>
-      <button class="btn btn-primary" @click="showCreateDialog">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-        新建简历
-      </button>
-    </div>
-
-    <div class="resume-grid">
-      <div v-for="item in resumeList" :key="item.id" class="resume-card" :class="{ default: item.status === 2 }">
-        <div class="card-header">
-          <div class="card-title-row">
-            <h3 class="card-title">{{ item.title || '未命名简历' }}</h3>
-            <span v-if="item.status === 2" class="default-badge">默认</span>
+        <p class="hero-eyebrow">MY RESUMES</p>
+        <h1 class="hero-title">我的简历</h1>
+        <p class="hero-sub">管理你的简历，选择一份开始模拟面试</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num">{{ resumeList.length }}</span>
+            <span class="hero-stat-lbl">份简历</span>
           </div>
-          <div class="card-actions">
-            <button class="btn btn-ghost btn-sm" @click="previewResume(item)">预览</button>
-            <button class="btn btn-ghost btn-sm" @click="editResume(item)">编辑</button>
-            <button class="btn btn-ghost btn-sm" @click="setDefault(item)" v-if="item.status !== 2">设为默认</button>
-            <button class="btn btn-danger btn-sm" @click="deleteResume(item.id)">删除</button>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">{{ defaultCount }}</span>
+            <span class="hero-stat-lbl">默认</span>
           </div>
         </div>
-        <div class="card-body">
-          <div class="info-grid">
-            <div class="info-item" v-if="item.name">
-              <span class="info-label">姓名</span>
-              <span class="info-value">{{ item.name }}</span>
-            </div>
-            <div class="info-item" v-if="item.jobPosition">
-              <span class="info-label">岗位</span>
-              <span class="info-value">{{ item.jobPosition }}</span>
-            </div>
-            <div class="info-item" v-if="item.education">
-              <span class="info-label">学历</span>
-              <span class="info-value">{{ item.education }}</span>
-            </div>
-            <div class="info-item" v-if="item.workYears !== null">
-              <span class="info-label">经验</span>
-              <span class="info-value">{{ item.workYears }}年</span>
-            </div>
-          </div>
-          <div class="skills-row" v-if="item.skills">
-            <span v-for="skill in item.skills.split(',')" :key="skill" class="skill-tag">{{ skill.trim() }}</span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="card-time">{{ formatDate(item.createTime) }}</span>
-          <button class="btn btn-primary btn-sm" @click="startInterview(item)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/></svg>
-            开始面试
-          </button>
-        </div>
-      </div>
-
-      <div v-if="resumeList.length === 0" class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-        <p>暂无简历</p>
-        <button class="btn btn-primary" @click="showCreateDialog">创建第一份简历</button>
       </div>
     </div>
 
-    <!-- 弹窗 -->
+    <!-- 简历列表 -->
+    <div class="resume-body">
+      <div class="resume-toolbar">
+        <p class="text-muted text-sm">共 {{ resumeList.length }} 份简历，设为默认的简历将用于面试</p>
+        <button class="btn btn--primary" @click="showCreateDialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          新建简历
+        </button>
+      </div>
+
+      <div class="resume-grid">
+        <div v-for="item in resumeList" :key="item.id" class="card resume-card" :class="{ 'resume-card--default': item.status === 2 }">
+          <div class="resume-card-top" v-if="item.status === 2">
+            <span class="default-badge">★ 默认简历</span>
+          </div>
+          <div class="resume-card-header">
+            <div class="resume-card-title-row">
+              <h3 class="resume-card-title">{{ item.title || '未命名简历' }}</h3>
+            </div>
+            <div class="resume-card-actions">
+              <button class="btn btn--ghost btn--sm" @click="previewResume(item)">预览</button>
+              <button class="btn btn--ghost btn--sm" @click="editResume(item)">编辑</button>
+              <button class="btn btn--ghost btn--sm" @click="setDefault(item)" v-if="item.status !== 2">设为默认</button>
+              <button class="btn btn--danger btn--sm" @click="deleteResume(item.id)">删除</button>
+            </div>
+          </div>
+          <div class="resume-card-body">
+            <div class="info-grid">
+              <div class="info-item" v-if="item.name">
+                <span class="info-label">姓名</span>
+                <span class="info-value">{{ item.name }}</span>
+              </div>
+              <div class="info-item" v-if="item.jobPosition">
+                <span class="info-label">求职岗位</span>
+                <span class="info-value">{{ item.jobPosition }}</span>
+              </div>
+              <div class="info-item" v-if="item.education">
+                <span class="info-label">学历</span>
+                <span class="info-value">{{ item.education }}</span>
+              </div>
+              <div class="info-item" v-if="item.workYears !== null">
+                <span class="info-label">工作年限</span>
+                <span class="info-value">{{ item.workYears }}年</span>
+              </div>
+            </div>
+            <div class="skills-row" v-if="item.skills">
+              <span v-for="skill in item.skills.split(',')" :key="skill" class="tag skill-tag">{{ skill.trim() }}</span>
+            </div>
+          </div>
+          <div class="resume-card-footer">
+            <span class="card-time text-xs text-muted">创建于 {{ formatDate(item.createTime) }}</span>
+            <button class="btn btn--primary btn--sm" @click="startInterview(item)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/></svg>
+              开始面试
+            </button>
+          </div>
+        </div>
+
+        <div v-if="resumeList.length === 0" class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <p>还没有简历，创建第一份开始面试吧</p>
+          <button class="btn btn--primary" @click="showCreateDialog">创建第一份简历</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新建/编辑弹窗 -->
     <teleport to="body">
-      <transition name="modal">
+      <transition name="fade">
         <div v-if="showDialog" class="modal-overlay" @click.self="showDialog = false">
-          <div class="modal-content modal-lg">
+          <div class="card modal-content">
             <div class="modal-header">
-              <h3>{{ isEdit ? '编辑简历' : '新建简历' }}</h3>
-              <button class="modal-close" @click="showDialog = false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
+              <h4>{{ isEdit ? '编辑简历' : '新建简历' }}</h4>
+              <button class="btn btn--ghost btn--icon" @click="showDialog = false" style="font-size:18px">✕</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
                 <label class="form-label">简历标题</label>
                 <input type="text" class="form-input" v-model="form.title" placeholder="如：Java高级开发简历">
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">姓名</label>
                   <input type="text" class="form-input" v-model="form.name" placeholder="请输入姓名">
@@ -96,7 +114,7 @@
                   <input type="text" class="form-input" v-model="form.phone" placeholder="请输入手机号">
                 </div>
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">邮箱</label>
                   <input type="text" class="form-input" v-model="form.email" placeholder="请输入邮箱">
@@ -106,7 +124,7 @@
                   <input type="text" class="form-input" v-model="form.jobPosition" placeholder="如：Java开发工程师">
                 </div>
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">学历</label>
                   <select class="form-select" v-model="form.education">
@@ -122,7 +140,7 @@
                   <input type="number" class="form-input" v-model="form.workYears" min="0" max="50">
                 </div>
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">毕业院校</label>
                   <input type="text" class="form-input" v-model="form.school" placeholder="请输入毕业院校">
@@ -146,8 +164,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-outline" @click="showDialog = false">取消</button>
-              <button class="btn btn-primary" @click="saveResume" :disabled="saving">
+              <button class="btn btn--ghost" @click="showDialog = false">取消</button>
+              <button class="btn btn--primary" @click="saveResume" :disabled="saving">
                 {{ isEdit ? '保存修改' : '创建简历' }}
               </button>
             </div>
@@ -158,31 +176,25 @@
 
     <!-- 预览弹窗 -->
     <teleport to="body">
-      <transition name="modal">
+      <transition name="fade">
         <div v-if="showPreviewDialog" class="modal-overlay" @click.self="showPreviewDialog = false">
-          <div class="modal-content modal-lg">
+          <div class="card modal-content modal-lg">
             <div class="modal-header">
-              <h3>简历预览</h3>
-              <button class="modal-close" @click="showPreviewDialog = false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
+              <h4>简历预览</h4>
+              <button class="btn btn--ghost btn--icon" @click="showPreviewDialog = false" style="font-size:18px">✕</button>
             </div>
             <div class="modal-body" v-if="previewItem">
-              <div class="preview-section">
+              <div class="preview-sheet">
                 <div class="preview-header">
                   <h2 class="preview-name">{{ previewItem.name || '未填写姓名' }}</h2>
+                  <p class="preview-job">{{ previewItem.jobPosition || '求职意向未填写' }}</p>
                   <div class="preview-contact">
-                    <span v-if="previewItem.phone">{{ previewItem.phone }}</span>
-                    <span v-if="previewItem.email">{{ previewItem.email }}</span>
+                    <span v-if="previewItem.phone">☎ {{ previewItem.phone }}</span>
+                    <span v-if="previewItem.email">✉ {{ previewItem.email }}</span>
                   </div>
                 </div>
 
-                <div class="preview-block" v-if="previewItem.jobPosition">
-                  <h4 class="block-title">求职意向</h4>
-                  <p>{{ previewItem.jobPosition }}</p>
-                </div>
-
-                <div class="preview-block">
+                <div class="preview-block" v-if="previewItem.education || previewItem.school || previewItem.major">
                   <h4 class="block-title">基本信息</h4>
                   <div class="info-row">
                     <span v-if="previewItem.education">学历：{{ previewItem.education }}</span>
@@ -195,7 +207,7 @@
                 <div class="preview-block" v-if="previewItem.skills">
                   <h4 class="block-title">专业技能</h4>
                   <div class="skills-row">
-                    <span v-for="skill in previewItem.skills.split(',')" :key="skill" class="skill-tag">{{ skill.trim() }}</span>
+                    <span v-for="skill in previewItem.skills.split(',')" :key="skill" class="tag skill-tag">{{ skill.trim() }}</span>
                   </div>
                 </div>
 
@@ -211,8 +223,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-outline" @click="showPreviewDialog = false">关闭</button>
-              <button class="btn btn-primary" @click="startInterview(previewItem)">使用此简历开始面试</button>
+              <button class="btn btn--ghost" @click="showPreviewDialog = false">关闭</button>
+              <button class="btn btn--primary" @click="startInterview(previewItem)">使用此简历开始面试</button>
             </div>
           </div>
         </div>
@@ -222,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/store'
@@ -244,6 +256,8 @@ const defaultForm = () => ({
 })
 
 const form = ref(defaultForm())
+
+const defaultCount = computed(() => resumeList.value.filter(i => i.status === 2).length)
 
 onMounted(() => loadResumeList())
 
@@ -310,7 +324,6 @@ const deleteResume = async (id) => {
 }
 
 const startInterview = (item) => {
-  // 跳转到面试大厅，并传递简历信息
   router.push({
     path: '/lobby',
     query: {
@@ -323,95 +336,174 @@ const startInterview = (item) => {
 </script>
 
 <style scoped>
-.resume-page { max-width: 960px; margin: 0 auto; }
+.resume-page { max-width: 960px; margin: 0 auto; padding: 0 var(--spacing-4); }
 
-.resume-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:16px }
-
-.resume-card {
-  background:var(--card); backdrop-filter:blur(16px);
-  border:1px solid var(--glass-border); border-radius:var(--radius);
-  overflow:hidden; transition:var(--transition)
+/* ── 页头 hero 色块 ── */
+.resume-hero {
+  background: linear-gradient(135deg, var(--color-accent), #E8A87C);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-8) var(--spacing-8) var(--spacing-7);
+  color: var(--color-accent-text);
+  margin: var(--spacing-6) 0 var(--spacing-6);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
 }
-.resume-card:hover { box-shadow:var(--shadow-hover); transform:translateY(-2px) }
-.resume-card.default { border-color:var(--primary) }
-
-.resume-card .card-header {
-  padding:16px 20px; border-bottom:1px solid rgba(0,0,0,0.04);
-  display:flex; justify-content:space-between; align-items:center
+.resume-hero::after {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
 }
-.card-title-row { display:flex; align-items:center; gap:8px }
-.resume-card .card-title { font-size:15px; font-weight:600; color:var(--gray-900) }
-
-.card-actions { display:flex; gap:8px }
-
-.resume-card .card-body { padding:20px }
-
-.info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px }
-.info-item { display:flex; flex-direction:column; gap:2px }
-.info-label { font-size:12px; color:var(--gray-400) }
-.info-value { font-size:13px; color:var(--gray-800); font-weight:500 }
-
-.skills-row { display:flex; flex-wrap:wrap; gap:6px }
-.skill-tag { font-size:12px; color:var(--gray-600); background:rgba(0,0,0,0.04); padding:2px 10px; border-radius:100px }
-
-.resume-card .card-footer {
-  padding:12px 20px; border-top:1px solid rgba(0,0,0,0.04);
-  display:flex; justify-content:space-between; align-items:center
+.resume-hero::before {
+  content: '';
+  position: absolute;
+  right: 40px; bottom: -60px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
 }
-.card-time { font-size:12px; color:var(--gray-400) }
+.resume-hero-inner { position: relative; z-index: 1; }
 
-.default-badge { font-size:11px; padding:2px 8px; background:var(--primary-light); color:var(--primary); border-radius:100px; font-weight:500 }
+.hero-back {
+  color: rgba(255,255,255,0.9); padding: 6px 12px; margin-bottom: var(--spacing-5); font-size: 13px;
+}
+.hero-back:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.hero-back svg { width: 16px; height: 16px; }
+
+.hero-eyebrow {
+  font-family: var(--font-display); font-size: 14px; font-style: italic;
+  letter-spacing: 0.14em; opacity: 0.85; margin-bottom: var(--spacing-2);
+}
+.hero-title {
+  font-size: 40px; color: #fff; letter-spacing: -0.01em;
+}
+.hero-sub { font-size: 15px; opacity: 0.9; margin-top: var(--spacing-2); }
+
+.hero-stats {
+  display: flex; align-items: center; gap: var(--spacing-5);
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-5);
+  border-top: 1px solid rgba(255,255,255,0.25);
+}
+.hero-stat-num { display: block; font-family: var(--font-display); font-size: 28px; font-weight: 700; color: #fff; line-height: 1; }
+.hero-stat-lbl { font-size: 12px; opacity: 0.85; }
+.hero-stat-div { width: 1px; height: 28px; background: rgba(255,255,255,0.3); }
+
+/* ── 工具栏 ── */
+.resume-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+}
+
+/* ── 简历卡片网格 ── */
+.resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: var(--spacing-4); }
+
+.resume-card { padding: 0; overflow: hidden; position: relative; }
+.resume-card--default { border-color: var(--color-accent); }
+.resume-card--default::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-accent), #E8A87C);
+}
+
+.resume-card-top { padding: var(--spacing-3) var(--spacing-5) 0; }
+.default-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 500; color: var(--color-accent);
+  background: var(--color-accent-light); border-radius: 999px; padding: 3px 10px;
+}
+
+.resume-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--spacing-4) var(--spacing-5);
+  border-bottom: 1px solid var(--color-divider);
+}
+.resume-card-title { font-size: 17px; font-weight: 600; }
+.resume-card-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+.resume-card-body { padding: var(--spacing-5); }
+
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-4); margin-bottom: var(--spacing-4); }
+.info-item { display: flex; flex-direction: column; gap: 2px; }
+.info-label { font-size: 12px; color: var(--color-text-placeholder); }
+.info-value { font-size: 14px; color: var(--color-text-primary); font-weight: 500; }
+
+.skills-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.skill-tag { background: var(--color-surface-subtle); color: var(--color-text-body); }
+
+.resume-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--spacing-4) var(--spacing-5);
+  border-top: 1px solid var(--color-divider);
+}
+.resume-card-footer .btn svg { width: 14px; height: 14px; }
+
+/* ── 危险按钮（design-system 未提供，对齐色板自建） ── */
+.btn--danger {
+  background: var(--color-danger-light); border-color: transparent;
+  color: var(--color-danger);
+}
+.btn--danger:hover { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
 
 /* ── 弹窗 ── */
 .modal-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,0.12); display:flex;
-  align-items:center; justify-content:center; z-index:1000; padding:16px
+  position: fixed; inset: 0; background: rgba(28, 25, 23, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: var(--spacing-4);
 }
-.modal-content {
-  background:var(--card); backdrop-filter:blur(16px);
-  border:1px solid var(--glass-border); border-radius:var(--radius-lg);
-  width:100%; max-width:520px; max-height:90vh; overflow-y:auto
-}
-.modal-lg { max-width:640px }
+.modal-content { width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 0; }
+.modal-lg { max-width: 680px; }
 
 .modal-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:20px; border-bottom:1px solid rgba(0,0,0,0.04);
-  position:sticky; top:0; z-index:1
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--spacing-5) var(--spacing-6);
+  border-bottom: 1px solid var(--color-divider);
+  position: sticky; top: 0; z-index: 1;
+  background: var(--color-surface);
 }
-.modal-header h3 { font-size:16px; font-weight:600; color:var(--gray-900) }
-.modal-close { width:28px; height:28px; border:none; background:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-400) }
-.modal-close:hover { background:rgba(0,0,0,0.04); color:var(--gray-600) }
-.modal-close svg { width:16px; height:16px }
+.modal-header h4 { font-size: 17px; }
 
-.modal-body { padding:20px }
-.form-group { margin-bottom:16px }
-.form-label { display:block; font-size:13px; font-weight:500; color:var(--gray-700); margin-bottom:6px }
-.form-input, .form-select, .form-textarea {
-  width:100%; padding:10px 12px; font-size:13px; font-family:var(--font);
-  background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.3);
-  border-radius:var(--radius-sm); outline:none; transition:var(--transition)
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--primary-soft); box-shadow:0 0 0 4px var(--primary-light); background:white }
-.form-textarea { resize:vertical; min-height:80px; line-height:1.5 }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px }
+.modal-body { padding: var(--spacing-6); }
+.form-row--2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) { .form-row--2 { grid-template-columns: 1fr; gap: 0; } }
 
 .modal-footer {
-  display:flex; gap:12px; justify-content:flex-end;
-  padding:16px 20px; border-top:1px solid rgba(0,0,0,0.04);
-  position:sticky; bottom:0
+  display: flex; gap: 10px; justify-content: flex-end;
+  padding: var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--color-divider);
+  position: sticky; bottom: 0; z-index: 1;
+  background: var(--color-surface);
 }
 
-.modal-enter-active,.modal-leave-active { transition:opacity 0.2s ease }
-.modal-enter-from,.modal-leave-to { opacity:0 }
-
 /* ── 预览 ── */
-.preview-section { padding:16px }
-.preview-header { text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid var(--primary) }
-.preview-name { font-size:22px; font-weight:600; color:var(--gray-900); margin-bottom:8px }
-.preview-contact { display:flex; justify-content:center; gap:16px; font-size:13px; color:var(--gray-600) }
-.preview-block { margin-bottom:20px }
-.preview-block .block-title { font-size:14px; font-weight:600; color:var(--primary); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.04) }
-.info-row { display:flex; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--gray-700) }
-.preview-text { font-size:13px; color:var(--gray-700); line-height:1.8; white-space:pre-wrap }
+.preview-sheet { padding: var(--spacing-2); }
+.preview-header {
+  text-align: center;
+  padding: var(--spacing-6) var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light);
+  border-bottom: 3px solid var(--color-accent);
+}
+.preview-name { font-size: 26px; font-weight: 600; color: var(--color-text-primary); }
+.preview-job {
+  font-size: 14px; color: var(--color-accent);
+  font-weight: 500; margin-top: var(--spacing-1);
+}
+.preview-contact { display: flex; justify-content: center; gap: var(--spacing-4); font-size: 13px; color: var(--color-text-secondary); margin-top: var(--spacing-3); }
+
+.preview-block { margin-bottom: var(--spacing-5); }
+.preview-block .block-title {
+  font-size: 14px; font-weight: 600; color: var(--color-accent);
+  margin-bottom: var(--spacing-3); padding-bottom: var(--spacing-2);
+  border-bottom: 2px solid var(--color-divider);
+  letter-spacing: 0.04em;
+}
+.info-row { display: flex; flex-wrap: wrap; gap: var(--spacing-4); font-size: 13px; color: var(--color-text-body); }
+.preview-text { font-size: 13px; color: var(--color-text-body); line-height: 1.8; white-space: pre-wrap; }
 </style>

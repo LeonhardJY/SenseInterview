@@ -1,16 +1,19 @@
 <template>
   <div class="questions-page">
-    <div class="page-header">
-      <h2 class="page-title">题库管理</h2>
-      <button class="btn btn-primary" @click="showAddModal = true">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Question Bank</p>
+        <h2 class="page-title">题库管理</h2>
+      </div>
+      <button class="btn btn--primary" @click="showAddModal = true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         添加题目
       </button>
-    </div>
+    </header>
 
     <!-- 筛选 -->
     <div class="filter-bar">
-      <select v-model="filterCategory" class="filter-select">
+      <select v-model="filterCategory" class="form-select filter-select">
         <option value="">全部分类</option>
         <option value="后端开发">后端开发</option>
         <option value="前端开发">前端开发</option>
@@ -21,17 +24,17 @@
         <option value="产品">产品</option>
         <option value="设计">设计</option>
       </select>
-      <select v-model="filterLevel" class="filter-select">
+      <select v-model="filterLevel" class="form-select filter-select">
         <option value="">全部难度</option>
         <option value="初级">初级</option>
         <option value="中级">中级</option>
         <option value="高级">高级</option>
       </select>
-      <span class="filter-count">共 {{ filteredQuestions.length }} 题</span>
+      <span class="filter-count text-muted text-sm">共 {{ filteredQuestions.length }} 题</span>
     </div>
 
     <!-- 题目列表 -->
-    <div class="table-card">
+    <div class="card table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -49,13 +52,13 @@
             <td class="title-cell">{{ q.title }}</td>
             <td>{{ q.category || '-' }}</td>
             <td>
-              <span class="level-tag" :class="q.level">{{ q.level || '-' }}</span>
+              <span class="tag" :class="{ 'tag--easy': q.level === '初级', 'tag--medium': q.level === '中级', 'tag--hard': q.level === '高级' }">{{ q.level || '-' }}</span>
             </td>
             <td class="answer-cell">{{ q.answer ? (q.answer.substring(0, 50) + '...') : '-' }}</td>
             <td>
               <div class="action-btns">
-                <button class="btn btn-sm btn-primary" @click="editQuestion(q)">编辑</button>
-                <button class="btn btn-sm btn-danger" @click="deleteQuestion(q)">删除</button>
+                <button class="btn btn--sm btn--primary" @click="editQuestion(q)">编辑</button>
+                <button class="btn btn--sm btn--danger" @click="deleteQuestion(q)">删除</button>
               </div>
             </td>
           </tr>
@@ -71,19 +74,17 @@
     <teleport to="body">
       <transition name="modal">
         <div v-if="showAddModal" class="modal-overlay" @click.self="closeModal">
-          <div class="modal-content">
+          <div class="card modal-content">
             <div class="modal-header">
               <h3>{{ editingId ? '编辑题目' : '添加题目' }}</h3>
-              <button class="modal-close" @click="closeModal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
+              <button class="btn btn--ghost btn--icon" @click="closeModal" style="font-size:18px">✕</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
                 <label class="form-label">题目标题 *</label>
                 <textarea v-model="form.title" class="form-textarea" rows="3" placeholder="请输入题目标题"></textarea>
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">分类</label>
                   <select v-model="form.category" class="form-select">
@@ -112,8 +113,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-outline" @click="closeModal">取消</button>
-              <button class="btn btn-primary" @click="saveQuestion">保存</button>
+              <button class="btn btn--ghost" @click="closeModal">取消</button>
+              <button class="btn btn--primary" @click="saveQuestion">保存</button>
             </div>
           </div>
         </div>
@@ -223,72 +224,38 @@ const deleteQuestion = async (q) => {
   max-width: 1200px;
 }
 
+/* ── 页头标题区 ── */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--spacing-5);
 }
 
 .page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--gray-900);
+  font-size: 28px;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 13px;
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-dark);
-}
-
+/* ── 筛选 ── */
 .filter-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
 }
 
 .filter-select {
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  cursor: pointer;
+  width: auto;
+  min-width: 140px;
 }
 
 .filter-count {
-  font-size: 13px;
-  color: var(--gray-500);
   margin-left: auto;
 }
 
+/* ── 表格（外层复用 .card，去掉内边距让表格铺满） ── */
 .table-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  padding: 0;
   overflow: hidden;
 }
 
@@ -301,18 +268,18 @@ const deleteQuestion = async (q) => {
 .data-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-divider);
   font-size: 13px;
 }
 
 .data-table th {
-  background: var(--gray-50);
+  background: var(--color-surface-subtle);
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--color-text-body);
 }
 
-.data-table tr:hover {
-  background: var(--gray-50);
+.data-table tbody tr:hover {
+  background: var(--color-surface-subtle);
 }
 
 .title-cell {
@@ -327,177 +294,93 @@ const deleteQuestion = async (q) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--gray-500);
-}
-
-.level-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 12px;
-  border-radius: 4px;
-}
-
-.level-tag.初级 {
-  background: var(--success-bg);
-  color: var(--success);
-}
-
-.level-tag.中级 {
-  background: var(--warning-bg);
-  color: var(--warning);
-}
-
-.level-tag.高级 {
-  background: var(--danger-bg);
-  color: var(--danger);
+  color: var(--color-text-secondary);
 }
 
 .action-btns {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 11px;
+/* 按钮内 svg 尺寸 */
+.btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-.btn-outline {
-  background: white;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-200);
+/* 危险按钮（design-system 未提供，对齐色板自建） */
+.btn--danger {
+  background: var(--color-danger-light);
+  border-color: transparent;
+  color: var(--color-danger);
 }
 
-.btn-outline:hover {
-  background: var(--gray-50);
+.btn--danger:hover {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
 }
 
-.btn-danger {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background: var(--danger);
-  color: white;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-8);
-  color: var(--gray-400);
-}
-
-/* 弹窗 */
+/* ── 弹窗（内容复用 .card，header/body/footer 自带内边距） ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(28, 25, 23, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 200;
+  padding: var(--spacing-4);
 }
 
 .modal-content {
-  background: white;
-  border-radius: var(--border-radius-lg);
   width: 100%;
   max-width: 560px;
-  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-5);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.modal-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--gray-400);
-}
-
-.modal-close:hover {
-  color: var(--gray-600);
-}
-
-.modal-close svg {
-  width: 18px;
-  height: 18px;
+  padding: var(--spacing-5) var(--spacing-6);
+  border-bottom: 1px solid var(--color-divider);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface);
 }
 
 .modal-body {
-  padding: var(--space-5);
+  padding: var(--spacing-6);
 }
 
-.form-group {
-  margin-bottom: var(--space-4);
+.form-row--2 {
+  grid-template-columns: repeat(2, 1fr);
 }
 
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-700);
-  margin-bottom: 6px;
-}
-
-.form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 13px;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--border-radius-sm);
-  resize: vertical;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
-}
-
-.form-select {
-  width: 100%;
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  cursor: pointer;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+@media (max-width: 640px) {
+  .form-row--2 { grid-template-columns: 1fr; gap: 0; }
 }
 
 .modal-footer {
   display: flex;
+  gap: 10px;
   justify-content: flex-end;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--color-divider);
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--color-surface);
 }
 
-/* 动画 */
+/* ── 动画 ── */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-base);
 }
 
 .modal-enter-from,

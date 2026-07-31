@@ -1,34 +1,35 @@
 <template>
   <div class="jobs-page">
-    <div class="page-header">
+    <header class="page-header">
       <div>
+        <p class="eyebrow">Jobs</p>
         <h2 class="page-title">岗位管理</h2>
-        <p class="page-subtitle">共 {{ jobs.length }} 个岗位</p>
+        <p class="page-subtitle text-muted text-sm">共 {{ jobs.length }} 个岗位</p>
       </div>
-      <button class="btn btn-primary" @click="showAddDialog">
+      <button class="btn btn--primary" @click="showAddDialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         新增岗位
       </button>
-    </div>
+    </header>
 
     <!-- 统计卡片 -->
     <div class="stats-row">
-      <div class="stat-card">
+      <div class="card stat-card">
         <div class="stat-icon total"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
         <div class="stat-info"><span class="stat-num">{{ jobs.length }}</span><span class="stat-label">总岗位数</span></div>
       </div>
-      <div class="stat-card">
+      <div class="card stat-card">
         <div class="stat-icon dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
         <div class="stat-info"><span class="stat-num">{{ categoryCount }}</span><span class="stat-label">分类数</span></div>
       </div>
-      <div class="stat-card">
+      <div class="card stat-card">
         <div class="stat-icon active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
         <div class="stat-info"><span class="stat-num">{{ levelCountText }}</span><span class="stat-label">难度分布</span></div>
       </div>
     </div>
 
     <!-- 岗位列表 -->
-    <div class="table-card">
+    <div class="card table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -49,12 +50,12 @@
             </td>
             <td class="cell-desc">{{ job.description || '-' }}</td>
             <td><span class="category-tag">{{ job.category || '-' }}</span></td>
-            <td><span class="level-tag" :class="levelClass(job.level)">{{ levelText(job.level) }}</span></td>
+            <td><span class="tag" :class="levelClass(job.level)">{{ levelText(job.level) }}</span></td>
             <td class="cell-time">{{ formatDate(job.createTime) }}</td>
             <td>
               <div class="action-btns">
-                <button class="btn btn-ghost btn-sm" @click="editJob(job)">编辑</button>
-                <button class="btn btn-danger btn-sm" @click="deleteJob(job)">删除</button>
+                <button class="btn btn--sm btn--ghost" @click="editJob(job)">编辑</button>
+                <button class="btn btn--sm btn--danger" @click="deleteJob(job)">删除</button>
               </div>
             </td>
           </tr>
@@ -63,7 +64,7 @@
 
       <div v-if="jobs.length === 0" class="empty-state">
         <p>暂无岗位数据</p>
-        <button class="btn btn-primary" @click="showAddDialog">新增第一个岗位</button>
+        <button class="btn btn--primary" @click="showAddDialog">新增第一个岗位</button>
       </div>
     </div>
 
@@ -71,12 +72,10 @@
     <teleport to="body">
       <transition name="modal">
         <div v-if="showDialog" class="modal-overlay" @click.self="showDialog = false">
-          <div class="modal-content">
+          <div class="card modal-content">
             <div class="modal-header">
               <h3>{{ isEdit ? '编辑岗位' : '新增岗位' }}</h3>
-              <button class="modal-close" @click="showDialog = false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
+              <button class="btn btn--ghost btn--icon" @click="showDialog = false" style="font-size:18px">✕</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
@@ -87,7 +86,7 @@
                 <label class="form-label">描述</label>
                 <textarea class="form-textarea" v-model="form.description" rows="3" placeholder="岗位描述和要求"></textarea>
               </div>
-              <div class="form-row">
+              <div class="form-row form-row--2">
                 <div class="form-group">
                   <label class="form-label">分类 <span class="required">*</span></label>
                   <select class="form-select" v-model="form.category">
@@ -107,8 +106,8 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-outline" @click="showDialog = false">取消</button>
-              <button class="btn btn-primary" @click="saveJob" :disabled="saving || !form.name || !form.category || !form.level">
+              <button class="btn btn--ghost" @click="showDialog = false">取消</button>
+              <button class="btn btn--primary" @click="saveJob" :disabled="saving || !form.name || !form.category || !form.level">
                 {{ saving ? '保存中...' : (isEdit ? '保存修改' : '新增岗位') }}
               </button>
             </div>
@@ -249,70 +248,80 @@ const formatDate = (dateStr) => {
 </script>
 
 <style scoped>
-.jobs-page { max-width: 1200px; }
+.jobs-page {
+  max-width: 1200px;
+}
 
+/* ── 页头标题区 ── */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--spacing-5);
 }
 
 .page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--gray-900);
-  margin: 0;
+  font-size: 28px;
 }
 
 .page-subtitle {
-  font-size: 13px;
-  color: var(--gray-500);
-  margin: 4px 0 0 0;
+  margin: var(--spacing-1) 0 0 0;
 }
 
-/* 统计卡片 */
+/* ── 统计卡片（外层复用 .card） ── */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
-  margin-bottom: var(--space-5);
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: var(--space-5);
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--spacing-4);
+  padding: var(--spacing-5);
 }
 
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.stat-icon svg { width: 24px; height: 24px; }
-.stat-icon.total { background: var(--primary-bg); color: var(--primary); }
-.stat-icon.dev { background: var(--success-bg); color: var(--success); }
-.stat-icon.active { background: var(--info-bg); color: var(--info); }
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+}
 
-.stat-num { display: block; font-size: 24px; font-weight: 600; color: var(--gray-900); }
-.stat-label { font-size: 13px; color: var(--gray-500); }
-.stat-info { display: flex; flex-direction: column; }
+.stat-icon.total { background: var(--color-accent-light); color: var(--color-accent); }
+.stat-icon.dev { background: var(--color-success-light); color: var(--color-success); }
+.stat-icon.active { background: var(--color-surface-subtle); color: var(--color-accent); }
 
-/* 表格 */
+.stat-num {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 表格（外层复用 .card，去掉内边距让表格铺满） ── */
 .table-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  padding: 0;
   overflow: hidden;
 }
 
@@ -325,30 +334,29 @@ const formatDate = (dateStr) => {
 .data-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-divider);
   font-size: 13px;
 }
 
 .data-table th {
-  background: var(--gray-50);
+  background: var(--color-surface-subtle);
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--color-text-body);
   white-space: nowrap;
 }
 
-.data-table tr:hover td {
-  background: var(--gray-50);
+.data-table tbody tr:hover td {
+  background: var(--color-surface-subtle);
 }
 
 .cell-id {
-  font-family: var(--font-mono);
-  color: var(--gray-400);
+  color: var(--color-text-placeholder);
   font-size: 12px;
 }
 
 .job-name {
   font-weight: 500;
-  color: var(--gray-900);
+  color: var(--color-text-primary);
 }
 
 .cell-desc {
@@ -356,11 +364,11 @@ const formatDate = (dateStr) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--gray-500);
+  color: var(--color-text-secondary);
 }
 
 .cell-time {
-  color: var(--gray-500);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -368,190 +376,108 @@ const formatDate = (dateStr) => {
   display: inline-block;
   padding: 2px 10px;
   font-size: 12px;
-  background: var(--gray-100);
-  color: var(--gray-600);
-  border-radius: 4px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  border-radius: 999px;
 }
 
-.level-tag {
-  display: inline-block;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 4px;
-}
-
-.level-easy { color: var(--level-easy); background: var(--level-easy-bg); }
-.level-medium { color: var(--level-medium); background: var(--level-medium-bg); }
-.level-hard { color: var(--level-hard); background: var(--level-hard-bg); }
+/* 难度标签：复用 .tag 基础胶囊样式，这里只补颜色 */
+.level-easy { background: var(--color-success-light); color: var(--color-success); }
+.level-medium { background: #FEF3C7; color: #B45309; }
+.level-hard { background: var(--color-danger-light); color: var(--color-danger); }
 
 .action-btns {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
+/* 按钮内 svg 尺寸 */
+.btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-.btn-sm { padding: 4px 8px; font-size: 11px; }
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
+/* 危险按钮（design-system 未提供，对齐色板自建） */
+.btn--danger {
+  background: var(--color-danger-light);
+  border-color: transparent;
+  color: var(--color-danger);
 }
 
-.btn-primary:hover { background: var(--primary-dark); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--gray-500);
+.btn--danger:hover {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
 }
 
-.btn-ghost:hover {
-  background: var(--gray-100);
-  color: var(--gray-700);
-}
-
-.btn-danger {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background: var(--danger);
-  color: white;
-}
-
-.btn-outline {
-  background: white;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-200);
-}
-
-.btn-outline:hover {
-  background: var(--gray-50);
-}
-
-/* 空状态 */
-.empty-state {
-  text-align: center;
-  padding: var(--space-10);
-  color: var(--gray-400);
-}
-
-.empty-state p {
-  margin-bottom: var(--space-4);
-}
-
-/* 弹窗 */
+/* ── 弹窗（内容复用 .card，header/body/footer 自带内边距） ── */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(28, 25, 23, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: var(--space-4);
+  z-index: 200;
+  padding: var(--spacing-4);
 }
 
 .modal-content {
-  background: white;
-  border-radius: var(--border-radius-lg);
   width: 100%;
   max-width: 520px;
-  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-5);
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-5) var(--spacing-6);
+  border-bottom: 1px solid var(--color-divider);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface);
 }
 
-.modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--gray-900);
+.modal-body {
+  padding: var(--spacing-6);
 }
 
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-400);
-  transition: var(--transition);
+.form-row--2 {
+  grid-template-columns: repeat(2, 1fr);
 }
 
-.modal-close:hover { background: var(--gray-100); color: var(--gray-600); }
-
-.modal-close svg { width: 18px; height: 18px; }
-
-.modal-body { padding: var(--space-5); }
-
-.form-group { margin-bottom: var(--space-4); }
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-700);
-  margin-bottom: 6px;
-}
-
-.required { color: var(--danger); }
-
-.form-input, .form-select, .form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  color: var(--gray-900);
-  transition: var(--transition);
-  font-family: var(--font-sans);
-}
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
-}
-
-.form-textarea { resize: vertical; min-height: 80px; }
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+@media (max-width: 640px) {
+  .form-row--2 { grid-template-columns: 1fr; gap: 0; }
 }
 
 .modal-footer {
   display: flex;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--border-color);
+  gap: 10px;
   justify-content: flex-end;
+  padding: var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--color-divider);
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--color-surface);
 }
 
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
-.modal-enter-from, .modal-leave-to { opacity: 0; }
+.required {
+  color: var(--color-danger);
+}
+
+/* ── 动画 ── */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity var(--transition-base);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
 </style>

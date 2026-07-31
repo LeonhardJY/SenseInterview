@@ -1,89 +1,79 @@
 <template>
   <div class="login-page">
-    <!-- 左侧介绍 -->
-    <div class="intro-panel">
-      <div class="intro-sticky">
+    <div class="login-bg" />
+    <span class="floating-brand" aria-hidden="true">SenseInterview</span>
+
+    <div class="login-grid section">
+      <div class="login-left">
         <div class="brand">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:26px;height:26px"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          <span>SenseInterview</span>
+          <span class="brand__mark">✦</span>
+          <span class="brand__name">SenseInterview</span>
         </div>
-
-        <h1 class="intro-title">AI 模拟面试平台</h1>
-        <p class="intro-desc">融合语音交互、面部表情分析与大语言模型，实现面试表现的多维度评估与实时反馈。</p>
-
-        <div class="tech-section">
-          <h4>技术栈</h4>
-          <div class="tech-tags">
-            <span class="tech-tag">Spring Boot</span>
-            <span class="tech-tag">Vue 3</span>
-            <span class="tech-tag">DeepSeek</span>
-            <span class="tech-tag">DeepFace</span>
-            <span class="tech-tag">WebSocket</span>
-            <span class="tech-tag">Redis</span>
-            <span class="tech-tag">LangChain4j</span>
-            <span class="tech-tag">MySQL</span>
+        <h1 class="login-title">AI 模拟面试平台</h1>
+        <p class="login-desc">融合语音交互、面部表情分析与大语言模型，实现面试表现的多维度评估与实时反馈。</p>
+        <div class="login-tech">
+          <span class="tech-tag">Spring Boot</span>
+          <span class="tech-tag">Vue 3</span>
+          <span class="tech-tag">DeepSeek</span>
+          <span class="tech-tag">DeepFace</span>
+          <span class="tech-tag">WebSocket</span>
+          <span class="tech-tag">Redis</span>
+        </div>
+        <div class="login-features">
+          <div class="lf-item">
+            <span class="lf-dot" />
+            <span>DeepSeek 大模型驱动，SSE 流式输出，首 token 延迟约 2.1 秒</span>
           </div>
-        </div>
-
-        <div class="feature-section">
-          <h4>核心能力</h4>
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="fi-dot"></div>
-              <div class="fi-text">多轮对话上下文保持，SSE 流式输出</div>
-            </div>
-            <div class="feature-item">
-              <div class="fi-dot"></div>
-              <div class="fi-text">DeepFace 面部情绪实时识别</div>
-            </div>
-            <div class="feature-item">
-              <div class="fi-dot"></div>
-              <div class="fi-text">TEXT / VOICE / VIDEO 三种面试模式</div>
-            </div>
-            <div class="feature-item">
-              <div class="fi-dot"></div>
-              <div class="fi-text">五维评分报告 + 情绪趋势分析</div>
-            </div>
+          <div class="lf-item">
+            <span class="lf-dot" />
+            <span>DeepFace 情绪识别，实时分析面试者面部表情</span>
+          </div>
+          <div class="lf-item">
+            <span class="lf-dot" />
+            <span>TEXT / VOICE / VIDEO 三种面试模式切换</span>
+          </div>
+          <div class="lf-item">
+            <span class="lf-dot" />
+            <span>五维评分报告：专业能力、表达、逻辑、情绪、自信</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 右侧表单 -->
-    <div class="form-panel">
-      <div class="form-card card">
-        <transition name="fade" mode="out-in">
-          <div v-if="mode === 'login'" key="login">
-            <div class="form-head">
-              <h2>欢迎回来</h2>
-              <p>登录以继续面试训练</p>
+      <div class="login-right">
+        <div class="card" style="padding:var(--spacing-8)">
+          <transition name="fade" mode="out-in">
+            <div v-if="mode === 'login'" key="login">
+              <div style="margin-bottom:var(--spacing-6)">
+                <h3>欢迎回来</h3>
+                <p class="text-muted text-sm" style="margin-top:4px">登录以继续面试训练</p>
+              </div>
+              <div v-if="errorMsg" class="form-alert error">{{ errorMsg }}</div>
+              <div v-if="successMsg" class="form-alert success">{{ successMsg }}</div>
+              <form @submit.prevent="handleLogin">
+                <div class="form-group"><label class="form-label">账号</label><input type="text" class="form-input" v-model="loginForm.username" placeholder="用户名"></div>
+                <div class="form-group"><label class="form-label">密码</label><input :type="showPw ? 'text' : 'password'" class="form-input" v-model="loginForm.password" placeholder="密码"></div>
+                <button type="submit" class="btn btn--primary btn--full" :disabled="loading" style="margin-top:4px">{{ loading ? '登录中...' : '登录' }}</button>
+              </form>
+              <p class="text-sm text-center" style="margin-top:20px;color:var(--color-text-secondary)">还没有账号？<a @click.prevent="mode='register'" style="cursor:pointer">注册</a></p>
             </div>
-            <div v-if="errorMsg" class="alert error">{{ errorMsg }}</div>
-            <div v-if="successMsg" class="alert success">{{ successMsg }}</div>
-            <form @submit.prevent="handleLogin">
-              <div class="field"><label>账号</label><input type="text" class="input" v-model="loginForm.username" placeholder="用户名"></div>
-              <div class="field"><label>密码</label><input :type="showPw ? 'text' : 'password'" class="input" v-model="loginForm.password" placeholder="密码"></div>
-              <button type="submit" class="btn btn-primary" style="width:100%" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
-            </form>
-            <p class="switch-text">还没有账号？<a @click.prevent="mode='register'">注册</a></p>
-          </div>
-          <div v-else key="register">
-            <div class="form-head">
-              <h2>创建账号</h2>
-              <p>注册后即可开始面试训练</p>
+            <div v-else key="register">
+              <div style="margin-bottom:var(--spacing-6)">
+                <h3>创建账号</h3>
+                <p class="text-muted text-sm" style="margin-top:4px">注册后即可开始面试训练</p>
+              </div>
+              <div v-if="errorMsg" class="form-alert error">{{ errorMsg }}</div>
+              <div v-if="successMsg" class="form-alert success">{{ successMsg }}</div>
+              <form @submit.prevent="handleRegister">
+                <div class="form-group"><label class="form-label">用户名</label><input type="text" class="form-input" v-model="registerForm.username" placeholder="用户名"></div>
+                <div class="form-group"><label class="form-label">邮箱</label><input type="email" class="form-input" v-model="registerForm.email" placeholder="邮箱"></div>
+                <div class="form-group"><label class="form-label">密码</label><input type="password" class="form-input" v-model="registerForm.password" placeholder="至少6位"></div>
+                <div class="form-group"><label class="form-label">确认密码</label><input type="password" class="form-input" v-model="registerForm.confirmPassword" placeholder="再次输入"></div>
+                <button type="submit" class="btn btn--primary btn--full" :disabled="loading" style="margin-top:4px">{{ loading ? '注册中...' : '注册' }}</button>
+              </form>
+              <p class="text-sm text-center" style="margin-top:20px;color:var(--color-text-secondary)">已有账号？<a @click.prevent="mode='login'" style="cursor:pointer">返回登录</a></p>
             </div>
-            <div v-if="errorMsg" class="alert error">{{ errorMsg }}</div>
-            <div v-if="successMsg" class="alert success">{{ successMsg }}</div>
-            <form @submit.prevent="handleRegister">
-              <div class="field"><label>用户名</label><input type="text" class="input" v-model="registerForm.username" placeholder="用户名"></div>
-              <div class="field"><label>邮箱</label><input type="email" class="input" v-model="registerForm.email" placeholder="邮箱"></div>
-              <div class="field"><label>密码</label><input type="password" class="input" v-model="registerForm.password" placeholder="至少6位"></div>
-              <div class="field"><label>确认密码</label><input type="password" class="input" v-model="registerForm.confirmPassword" placeholder="再次输入"></div>
-              <button type="submit" class="btn btn-primary" style="width:100%" :disabled="loading">{{ loading ? '注册中...' : '注册' }}</button>
-            </form>
-            <p class="switch-text">已有账号？<a @click.prevent="mode='login'">返回登录</a></p>
-          </div>
-        </transition>
+          </transition>
+        </div>
       </div>
     </div>
   </div>
@@ -131,94 +121,66 @@ const handleRegister = async () => {
 
 <style scoped>
 .login-page {
-  min-height:100vh; display:flex; position:relative; overflow:hidden;
-  background:var(--bg);
+  min-height: 100vh; display: flex; align-items: center;
+  position: relative; overflow: hidden;
 }
-/* 右侧粒子渐变动画 */
-.login-page::before {
-  content:''; position:absolute; right:0; top:0; width:55%; height:100%;
-  background:
-    radial-gradient(circle at 70% 30%, rgba(217,119,6,0.06) 0%, transparent 40%),
-    radial-gradient(circle at 50% 70%, rgba(99,102,241,0.04) 0%, transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(244,114,182,0.03) 0%, transparent 35%);
-  animation:ambientGlow 8s ease-in-out infinite alternate;
-  pointer-events:none;
+.login-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 50% 40% at 15% 30%, rgba(217,119,87,0.06) 0%, transparent 55%),
+              radial-gradient(ellipse 40% 35% at 85% 80%, rgba(217,119,87,0.04) 0%, transparent 50%);
+  pointer-events: none;
 }
-@keyframes ambientGlow {
-  0% { opacity:0.6; transform:scale(1) }
-  50% { opacity:1; transform:scale(1.05) }
-  100% { opacity:0.6; transform:scale(1) }
+.floating-brand {
+  position: fixed; top: 45%; left: 50%; z-index: 0;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(120px, 20vw, 300px); font-weight: 400;
+  color: var(--color-text-primary); opacity: 0.035;
+  pointer-events: none; user-select: none;
+  line-height: 1; white-space: nowrap;
+  animation: floatSlow 12s ease-in-out infinite;
 }
-/* 分隔线 */
-.login-page::after {
-  content:''; position:absolute; left:45%; top:8%; bottom:8%;
-  width:1px; background:linear-gradient(180deg,transparent,var(--gray-300),transparent);
-}
-
-/* ── 左侧介绍 ── */
-.intro-panel {
-  flex:0 0 45%; display:flex; align-items:center; justify-content:flex-end;
-  padding:40px 60px 40px 0;
-}
-.intro-sticky {
-  max-width:420px;
-  animation:floatIn 0.6s ease both;
+@keyframes floatSlow {
+  0%, 100% { transform: translate(-50%,-50%) rotate(-1deg); }
+  50% { transform: translate(-50%,-50%) rotate(-1deg) translateY(-16px); }
 }
 
-.brand { display:flex; align-items:center; gap:12px; font-size:20px; font-weight:700; color:var(--primary); margin-bottom:40px }
-.brand svg { width:30px; height:30px; color:var(--accent) }
+.login-grid {
+  display: grid; grid-template-columns: 1fr 420px; gap: 60px;
+  align-items: center; width: 100%; position: relative; z-index: 1;
+  padding-top: var(--spacing-10); padding-bottom: var(--spacing-10);
+}
+.login-left { position: relative; }
 
-.intro-title { font-size:34px; font-weight:700; color:var(--gray-900); letter-spacing:-0.03em; line-height:1.25; margin-bottom:14px }
-.intro-desc { font-size:15px; color:var(--gray-400); line-height:1.8; margin-bottom:36px }
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: var(--spacing-8); }
+.brand__mark { font-size: 22px; color: var(--color-accent); }
+.brand__name { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
 
-.tech-section { margin-bottom:32px }
-.tech-section h4 { font-size:13px; font-weight:600; color:var(--gray-600); margin-bottom:12px }
-.tech-tags { display:flex; flex-wrap:wrap; gap:8px }
+.login-title { font-size: 48px; font-weight: 600; margin-bottom: var(--spacing-4); }
+.login-desc { font-size: 15px; color: var(--color-text-secondary); line-height: 1.7; max-width: 420px; margin-bottom: var(--spacing-8); }
+
 .tech-tag {
-  padding:4px 14px; font-size:13px; font-weight:500;
-  background:var(--accent-light); color:var(--accent);
-  border-radius:var(--radius-pill)
+  display: inline-flex; padding: 4px 14px; margin: 0 6px 6px 0;
+  font-size: 13px; font-weight: 500;
+  background: var(--color-accent-light); color: var(--color-accent);
+  border-radius: 999px;
 }
+.login-features { display: flex; flex-direction: column; gap: 12px; margin-top: var(--spacing-6); }
+.lf-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--color-text-body); line-height: 1.5; }
+.lf-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-accent); margin-top: 8px; flex-shrink: 0; }
 
-.feature-section h4 { font-size:13px; font-weight:600; color:var(--gray-600); margin-bottom:12px }
-.feature-list { display:flex; flex-direction:column; gap:12px }
-.feature-item { display:flex; align-items:flex-start; gap:10px }
-.fi-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); margin-top:7px; flex-shrink:0 }
-.fi-text { font-size:14px; color:var(--gray-600); line-height:1.6 }
+.form-alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: var(--spacing-4); }
+.form-alert.error { background: var(--color-danger-light); color: var(--color-danger); }
+.form-alert.success { background: var(--color-success-light); color: var(--color-success); }
 
-/* ── 右侧表单 ── */
-.form-panel {
-  flex:1; display:flex; align-items:center; justify-content:center;
-  padding:40px 60px;
-  position:relative; z-index:1;
+@media (max-width: 1024px) {
+  .login-grid { grid-template-columns: 1fr; gap: var(--spacing-8); }
+  .login-title { font-size: 36px; }
+  .login-desc { max-width: none; }
 }
-.form-card { width:100%; max-width:420px; padding:36px }
-
-.form-head { margin-bottom:28px }
-.form-head h2 { font-size:22px; font-weight:700; color:var(--gray-900); margin-bottom:6px }
-.form-head p { font-size:14px; color:var(--gray-400) }
-
-.field { margin-bottom:18px }
-.field label { display:block; font-size:13px; font-weight:500; color:var(--gray-700); margin-bottom:6px }
-
-.alert { padding:10px 14px; border-radius:12px; font-size:13px; margin-bottom:16px }
-.alert.error { background:var(--rose-light); color:var(--rose) }
-.alert.success { background:rgba(34,197,94,0.1); color:#16a34a }
-
-.switch-text { text-align:center; margin-top:20px; font-size:13px; color:var(--gray-400) }
-.switch-text a { color:var(--accent); font-weight:500; cursor:pointer; text-decoration:none }
-
-.fade-enter-active,.fade-leave-active { transition:opacity 0.2s ease }
-.fade-enter-from,.fade-leave-to { opacity:0 }
-
-@keyframes floatIn { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-
-@media (max-width:768px) {
-  .login-page { flex-direction:column }
-  .intro-panel { flex:none; padding:32px 24px 0; justify-content:center }
-  .intro-sticky { max-width:100%; position:static }
-  .intro-title { font-size:22px }
-  .form-panel { padding:24px; justify-content:center }
-  .form-card { max-width:100% }
+@media (max-width: 768px) {
+  .login-page { align-items: flex-start; }
+  .login-grid { padding-top: var(--spacing-8); }
+  .login-title { font-size: 28px; }
+  .login-features { display: none; }
 }
 </style>

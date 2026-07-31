@@ -1,21 +1,22 @@
 <template>
-  <div class="interviews-page">
+  <div class="interviews-page fade-in">
     <div class="page-header">
-      <h2 class="page-title">面试记录</h2>
-      <div class="page-stats">
-        共 {{ interviews.length }} 条记录
+      <div>
+        <p class="eyebrow">Admin · 面试</p>
+        <h2>面试记录</h2>
       </div>
+      <p class="page-stats text-sm text-muted">共 {{ interviews.length }} 条记录</p>
     </div>
 
     <!-- 筛选 -->
     <div class="filter-bar">
-      <select v-model="filterStatus" class="filter-select">
+      <select v-model="filterStatus" class="filter-select form-select">
         <option value="">全部状态</option>
         <option value="COMPLETED">已完成</option>
         <option value="IN_PROGRESS">进行中</option>
         <option value="CREATED">待开始</option>
       </select>
-      <select v-model="filterMode" class="filter-select">
+      <select v-model="filterMode" class="filter-select form-select">
         <option value="">全部模式</option>
         <option value="TEXT">文字面试</option>
         <option value="VOICE">语音面试</option>
@@ -24,7 +25,7 @@
     </div>
 
     <!-- 面试列表 -->
-    <div class="table-card">
+    <div class="card table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -47,7 +48,7 @@
             <td>{{ modeText(item.mode) }}</td>
             <td>{{ item.difficulty || '-' }}</td>
             <td>
-              <span class="status-tag" :class="item.status?.toLowerCase()">
+              <span class="status status-tag" :class="item.status?.toLowerCase()">
                 {{ statusText(item.status) }}
               </span>
             </td>
@@ -55,10 +56,10 @@
             <td>{{ formatDate(item.endTime) }}</td>
             <td>
               <div class="action-btns">
-                <button class="btn btn-sm btn-primary" @click="viewReport(item)" v-if="item.status === 'COMPLETED'">
+                <button class="btn btn--sm btn--primary" @click="viewReport(item)" v-if="item.status === 'COMPLETED'">
                   查看报告
                 </button>
-                <button class="btn btn-sm btn-danger" @click="deleteInterview(item)">
+                <button class="btn btn--sm btn--danger" @click="deleteInterview(item)">
                   删除
                 </button>
               </div>
@@ -151,42 +152,32 @@ const deleteInterview = async (item) => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-5);
+  align-items: flex-end;
+  margin-bottom: var(--spacing-5);
 }
 
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--gray-900);
+.page-header .eyebrow {
+  margin-bottom: 2px;
 }
 
-.page-stats {
-  font-size: 13px;
-  color: var(--gray-500);
+.page-header h2 {
+  font-size: 24px;
+  margin: 0;
 }
 
 .filter-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
 }
 
-.filter-select {
-  height: 36px;
-  padding: 0 12px;
-  font-size: 13px;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--border-radius-sm);
-  background: white;
-  cursor: pointer;
+.filter-bar .filter-select {
+  width: 170px;
 }
 
 .table-card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
+  padding: 0;
   overflow: hidden;
 }
 
@@ -199,87 +190,52 @@ const deleteInterview = async (item) => {
 .data-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-divider);
   font-size: 13px;
 }
 
 .data-table th {
-  background: var(--gray-50);
+  background: var(--color-surface-subtle);
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--color-text-body);
 }
 
-.data-table tr:hover {
-  background: var(--gray-50);
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.status-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 12px;
-  border-radius: 4px;
+.data-table tbody tr:hover {
+  background: var(--color-surface-hover);
 }
 
 .status-tag.created {
-  background: var(--gray-100);
-  color: var(--gray-600);
+  background: #FEF3C7;
+  color: #B45309;
 }
 
 .status-tag.in_progress {
-  background: var(--primary-bg);
-  color: var(--primary);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
 }
 
 .status-tag.completed {
-  background: var(--success-bg);
-  color: var(--success);
+  background: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .action-btns {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
+.btn--danger {
+  background: var(--color-danger-light);
+  border-color: transparent;
+  color: var(--color-danger);
 }
 
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 11px;
-}
-
-.btn-primary {
-  background: var(--primary-bg);
-  color: var(--primary);
-}
-
-.btn-primary:hover {
-  background: var(--primary);
+.btn--danger:hover {
+  background: var(--color-danger);
   color: white;
-}
-
-.btn-danger {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background: var(--danger);
-  color: white;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-8);
-  color: var(--gray-400);
 }
 </style>
