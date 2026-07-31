@@ -89,7 +89,8 @@ def analyze():
             r = result[0]
             emotion = r.get("dominant_emotion", "unknown")
             emotions = r.get("emotion", {})
-            confidence = emotions.get(emotion, 0.0) / 100.0
+            # float32 除法会产生 0.94999998 这类误差，先转 Python float 再运算
+            confidence = float(emotions.get(emotion, 0.0)) / 100.0
             label = EMOTION_LABELS.get(emotion, emotion)
 
             # DeepFace 返回 numpy float32，jsonify 不能序列化，需转原生 float
@@ -97,7 +98,7 @@ def analyze():
                 "emotion": emotion,
                 "label": label,
                 "confidence": float(round(confidence, 4)),
-                "details": {k: float(round(v / 100.0, 4)) for k, v in emotions.items()}
+                "details": {k: float(round(float(v) / 100.0, 4)) for k, v in emotions.items()}
             })
 
         return jsonify({"emotion": "none", "confidence": 0, "details": {}})
