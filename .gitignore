@@ -27,8 +27,11 @@ Thumbs.db
 # Node.js
 node_modules/
 dist/
-.env.local
-.env.*.local
+
+# 环境变量文件（含密钥，禁止提交）
+.env
+.env.*
+!.env.example
 
 # Maven
 .mvn/

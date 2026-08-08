@@ -15,7 +15,7 @@ spring:
       max-request-size: 50MB
 
 jwt:
-  secret: REPLACED-JWT-SECRET
+  secret: ${JWT_SECRET:change-me-to-a-random-32-char-secret}
   expiration: 86400000
 
 ai:
@@ -25,9 +25,9 @@ ai:
     # NLP自然语言处理配置
     nlp:
       provider: aliyun
-      app-key: your-app-key
-      access-key-id: your-access-key-id
-      access-key-secret: your-access-key-secret
+      app-key: ${SENSE_NLP_APP_KEY:your-app-key}
+      access-key-id: ${SENSE_NLP_ACCESS_KEY_ID:your-access-key-id}
+      access-key-secret: ${SENSE_NLP_ACCESS_KEY_SECRET:your-access-key-secret}
     # LLM大语言模型配置 (DeepSeek)
     llm:
       provider: deepseek

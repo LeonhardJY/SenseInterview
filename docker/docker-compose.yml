@@ -1,5 +1,8 @@
 version: '3.8'
 
+# 敏感配置（数据库密码、JWT密钥）默认用于本地开发，
+# 生产环境请在同目录 .env 文件中覆盖（参考 docker/.env.example）。
+
 services:
   # ============ 基础服务 ============
   mysql:
@@ -9,7 +12,7 @@ services:
     ports:
       - "3307:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-123456}
       MYSQL_DATABASE: ai_interview
       MYSQL_CHARSET: utf8mb4
       TZ: Asia/Shanghai
@@ -40,10 +43,10 @@ services:
       - "8081:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-123456}
       SPRING_REDIS_HOST: redis
-      JWT_SECRET: REPLACED-JWT-SECRET
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-char-secret}
       SERVER_ADDRESS: 0.0.0.0
     depends_on:
       - mysql
@@ -61,10 +64,10 @@ services:
       - "8082:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-123456}
       SPRING_REDIS_HOST: redis
-      JWT_SECRET: REPLACED-JWT-SECRET
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-char-secret}
       SERVER_ADDRESS: 0.0.0.0
     depends_on:
       - mysql
@@ -82,10 +85,10 @@ services:
       - "8083:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-123456}
       SPRING_REDIS_HOST: redis
-      JWT_SECRET: REPLACED-JWT-SECRET
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-char-secret}
       SERVER_ADDRESS: 0.0.0.0
     depends_on:
       - mysql
@@ -103,7 +106,7 @@ services:
       - "8086:8080"
     environment:
       SPRING_REDIS_HOST: redis
-      JWT_SECRET: REPLACED-JWT-SECRET
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-char-secret}
       SERVER_ADDRESS: 0.0.0.0
     depends_on:
       - redis

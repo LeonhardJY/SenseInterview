@@ -63,24 +63,37 @@ frontend/
 - Redis
 - DeepSeek API Key（获取地址：https://platform.deepseek.com/api_keys）
 
-### API Key 配置
+### 环境变量配置
 
-系统通过环境变量 `SENSE_LLM_KEY` 读取 DeepSeek API Key，可按以下方式配置：
+所有敏感配置均通过环境变量注入，仓库中不包含任何真实密钥。可复制项目根目录的 `.env.example` 为 `.env` 并按需修改，或按下方方式配置到系统/IDEA 启动环境。
+
+| 变量 | 说明 | 必填 |
+|------|------|------|
+| `SENSE_LLM_KEY` | DeepSeek API Key（获取：https://platform.deepseek.com/api_keys） | 是 |
+| `SPRING_DATASOURCE_USERNAME` | MySQL 用户名（默认 `root`） | 否 |
+| `SPRING_DATASOURCE_PASSWORD` | MySQL 密码 | 是 |
+| `JWT_SECRET` | JWT 签名密钥，各微服务须一致，需 ≥32 字符（生成：`openssl rand -base64 48`） | 是 |
+| `SENSE_NLP_APP_KEY` | 阿里云 NLP AppKey（可选） | 否 |
+| `SENSE_NLP_ACCESS_KEY_ID` | 阿里云 AccessKey ID（可选） | 否 |
+| `SENSE_NLP_ACCESS_KEY_SECRET` | 阿里云 AccessKey Secret（可选） | 否 |
+
+配置示例：
 
 ```bash
 # Windows（全局生效）
 setx SENSE_LLM_KEY sk-your-deepseek-api-key-here
+setx SPRING_DATASOURCE_PASSWORD your-mysql-password
+setx JWT_SECRET your-random-jwt-secret-at-least-32-chars
 
 # Linux / Mac（临时生效，关闭终端后失效）
 export SENSE_LLM_KEY=sk-your-deepseek-api-key-here
-
-# Linux / Mac（永久生效）
-echo 'export SENSE_LLM_KEY=sk-your-deepseek-api-key-here' >> ~/.bashrc
+export SPRING_DATASOURCE_PASSWORD=your-mysql-password
+export JWT_SECRET=your-random-jwt-secret-at-least-32-chars
 ```
 
-IDEA 用户可在启动配置中设置：`Run` → `Edit Configurations` → `Environment variables` 添加 `SENSE_LLM_KEY=your-key`。
+IDEA 用户可在启动配置中设置：`Run` → `Edit Configurations` → `Environment variables` 添加上述变量。
 
-> 注意：API Key 已从代码仓库中移除，配置文件中的 `${SENSE_LLM_KEY:sk-placeholder}` 会读取环境变量，未设置时使用占位值 `sk-placeholder` 会导致 LLM 调用失败。
+> 注意：配置文件中的 `${VAR:默认值}` 会优先读取环境变量，未设置时使用占位值（如 `sk-placeholder`、`your-mysql-password`），会导致对应功能不可用。生产环境务必设置真实密钥，并保持所有服务的 `JWT_SECRET` 一致。
 
 ### 启动步骤
 

@@ -166,7 +166,7 @@ docker run -d \
   -e SPRING_DATASOURCE_USERNAME=root \
   -e SPRING_DATASOURCE_PASSWORD=123456 \
   -e SPRING_REDIS_HOST=host.docker.internal \
-  -e JWT_SECRET=REPLACED-JWT-SECRET \
+  -e JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-32-char-secret} \
   ai-user-service
 ```
 
