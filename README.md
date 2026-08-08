@@ -1,52 +1,37 @@
-<div align="center">
+# SenseInterview
 
-# 🎤 SenseInterview
+AI 模拟面试评测平台，融合语音交互、面部表情分析与大语言模型，从专业知识、语言表达、逻辑思维、情绪控制、自信程度五个维度对面试表现进行多源综合评估与实时反馈。
 
-### AI 模拟面试评测平台
+[![Java 17](https://img.shields.io/badge/Java-17-F89820?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
+[![Spring Boot 3.2](https://img.shields.io/badge/Spring%20Boot-3.2-6DB33F?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Vue 3.4](https://img.shields.io/badge/Vue-3.4-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![DeepSeek LLM](https://img.shields.io/badge/DeepSeek-LLM-4D6BFE)](https://platform.deepseek.com/)
+[![License MIT](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/licenses/MIT)
 
-> 融合 **语音交互** · **面部表情分析** · **大语言模型**，破解纯文本面试评估维度单一的痛点。
-> 从专业知识、语言表达、逻辑思维、情绪控制、自信程度五个维度，对面试表现进行多源数据综合评估与实时反馈。
+## 目录
 
-[![GitHub stars](https://img.shields.io/github/stars/LeonhardJY/SenseInterview?style=for-the-badge&logo=github&logoColor=white)](https://github.com/LeonhardJY/SenseInterview)
-[![GitHub forks](https://img.shields.io/github/forks/LeonhardJY/SenseInterview?style=for-the-badge&logo=github&logoColor=white)](https://github.com/LeonhardJY/SenseInterview)
-[![Java 17](https://img.shields.io/badge/Java-17-F89820?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/17/)
-[![Spring Boot 3.2](https://img.shields.io/badge/Spring%20Boot-3.2-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Vue 3.4](https://img.shields.io/badge/Vue-3.4-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
-[![DeepSeek LLM](https://img.shields.io/badge/DeepSeek-LLM-4D6BFE?style=for-the-badge)](https://platform.deepseek.com/)
-[![License MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](https://opensource.org/licenses/MIT)
+- [核心亮点](#核心亮点)
+- [技术栈](#技术栈)
+- [系统架构](#系统架构)
+- [项目结构](#项目结构)
+- [快速开始](#快速开始)
+- [环境变量配置](#环境变量配置)
+- [文档](#文档)
+- [License](#license)
 
-**技术栈**　Java 17 · Spring Boot 3.2 · Spring Cloud · Vue 3.4 · Element Plus · DeepSeek · LangChain4j · WebSocket · SSE · DeepFace
+## 核心亮点
 
-</div>
+| 亮点 | 说明 |
+|------|------|
+| 多维度评分 | 综合文本、语音、画面三种数据源，覆盖专业能力、表达能力、逻辑能力、情绪控制、自信程度五个维度 |
+| 语音输入 | 基于浏览器 [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API) 实时语音转文字，语音模式下支持自动提交 |
+| 面部情绪识别 | 部署 DeepFace Python 微服务，视频面试模式下实时分析面部表情，识别自信、紧张、平静、惊讶等情绪 |
+| 流式输出 | 所有 LLM 交互采用 SSE（Server-Sent Events）逐字推送，首 token 延迟由约 5 秒降至约 2.1 秒 |
+| 多轮对话管理 | 基于 LangChain4j 对话记忆组件与 Redis 会话缓存，维持连贯的多轮面试追问 |
+| 面试模式切换 | 支持 `TEXT`（文字）、`VOICE`（语音识别 + 自动提交）、`VIDEO`（摄像头 + 实时情绪分析）三种模式 |
+| 综合报告 | 面试结束自动生成五维评分、情绪分布趋势、LLM 改进建议的完整报告 |
 
----
-
-## 📋 目录
-
-- [✨ 核心亮点](#核心亮点)
-- [🧩 技术栈](#技术栈)
-- [🏗️ 系统架构](#系统架构)
-- [📁 项目结构](#项目结构)
-- [🚀 快速开始](#快速开始)
-- [⚙️ 环境变量配置](#环境变量配置)
-- [📚 文档](#文档)
-- [📄 License](#license)
-
----
-
-## ✨ 核心亮点
-
-| | 亮点 | 说明 |
-|---|------|------|
-| 🎯 | **多维度评分** | 综合文本、语音、画面三种数据源，覆盖专业能力、表达能力、逻辑能力、情绪控制、自信程度五个维度 |
-| 🎙️ | **语音输入** | 基于浏览器 [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API) 实时语音转文字，语音模式下支持自动提交 |
-| 🎥 | **面部情绪识别** | 部署 DeepFace Python 微服务，视频面试模式下实时分析面部表情，识别自信、紧张、平静、惊讶等情绪 |
-| ⚡ | **流式输出** | 所有 LLM 交互采用 SSE（Server-Sent Events）逐字推送，首 token 延迟由约 5 秒降至约 **2.1 秒** |
-| 💬 | **多轮对话管理** | 基于 LangChain4j 对话记忆组件 + Redis 会话缓存，维持连贯的多轮面试追问 |
-| 🔀 | **面试模式切换** | 支持 `TEXT`（文字）、`VOICE`（语音识别 + 自动提交）、`VIDEO`（摄像头 + 实时情绪分析）三种模式 |
-| 📊 | **综合报告** | 面试结束自动生成五维评分、情绪分布趋势、LLM 改进建议的完整报告 |
-
-## 🧩 技术栈
+## 技术栈
 
 | 类别 | 技术 |
 |------|------|
@@ -56,26 +41,26 @@
 | 语音 / 视觉 | [![Web Speech API](https://img.shields.io/badge/Web%20Speech-API-FF6B6B)](https://developer.mozilla.org/docs/Web/API/Web_Speech_API) [![DeepFace](https://img.shields.io/badge/DeepFace-Python-3776AB?logo=python&logoColor=white)](https://github.com/serengil/deepface) [![Flask](https://img.shields.io/badge/Flask-2.3-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/) |
 | 存储 / 基础设施 | [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/) [![Redis](https://img.shields.io/badge/Redis-7-FF4438?logo=redis&logoColor=white)](https://redis.io/) [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/) |
 
-## 🏗️ 系统架构
+## 系统架构
 
 ```
 浏览器 (Vue 3)
-    │
-    ├── /api/* ──▶ 网关 (Spring Cloud Gateway) ──▶ 各后端服务模块
-    │                          │
-    ├── /ws/* ──▶ 网关 ──▶ WebSocket 处理器 ──▶ 面试实时状态推送
-    │                          │
-    ├── SSE ──▶ /api/ai/* ──▶ LLM 流式 ──▶ DeepSeek API
-    │                          │
-    └── 摄像头 ──▶ /api/ai/analyze-emotion ──▶ FaceAnalysisService ──▶ DeepFace (Python)
+    |
+    ├── /api/* ---- 网关 (Spring Cloud Gateway) ---- 后端服务模块
+    │                          |
+    ├── /ws/* ---- 网关 ---- WebSocket 处理器 ---- 面试实时状态推送
+    │                          |
+    ├── SSE ---- /api/ai/* ---- LLM 流式 ---- DeepSeek API
+    │                          |
+    └── 摄像头 ---- /api/ai/analyze-emotion ---- FaceAnalysisService ---- DeepFace (Python)
 ```
 
-- **统一网关**：所有 API 请求经网关转发，负责 JWT 鉴权与路由分发。
-- **实时通信**：每场面试建立独立 WebSocket 连接，推送面试进度与实时状态。
-- **流式 LLM**：SSE 逐字渲染，首 token 延迟约 2.1 秒。
-- **视觉分析**：DeepFace 以独立 Python Flask 进程运行，AI 服务通过 HTTP 异步调用。
+- 统一网关：所有 API 请求经网关转发，负责 JWT 鉴权与路由分发。
+- 实时通信：每场面试建立独立 WebSocket 连接，推送面试进度与实时状态。
+- 流式 LLM：SSE 逐字渲染，首 token 延迟约 2.1 秒。
+- 视觉分析：DeepFace 以独立 Python Flask 进程运行，AI 服务通过 HTTP 异步调用。
 
-## 📁 项目结构
+## 项目结构
 
 ```
 backend/
@@ -99,15 +84,16 @@ frontend/
 │   └── api/                   # Axios 实例与拦截器
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 
-- [Java 17+](https://openjdk.org/projects/jdk/17/)
-- [Node.js 18+](https://nodejs.org/)
-- [Python 3.10+](https://www.python.org/)（运行 DeepFace 情绪识别时需要）
-- [MySQL 8.0](https://www.mysql.com/) & [Redis](https://redis.io/)
-- [DeepSeek API Key](https://platform.deepseek.com/api_keys)
+- Java 17+
+- Node.js 18+
+- Python 3.10+（运行 DeepFace 情绪识别时需要）
+- MySQL 8.0
+- Redis
+- DeepSeek API Key（获取地址：https://platform.deepseek.com/api_keys）
 
 ### 启动步骤
 
@@ -153,7 +139,7 @@ python app.py                               # 端口 5000
 
 本地一键部署方式见 [docker/README.md](docker/README.md)，敏感配置通过 `docker/.env` 注入。
 
-## ⚙️ 环境变量配置
+## 环境变量配置
 
 所有敏感配置均通过环境变量注入，仓库中不包含任何真实密钥。可复制项目根目录的 `.env.example` 为 `.env` 并按需修改。
 
@@ -183,16 +169,14 @@ export JWT_SECRET=your-random-jwt-secret-at-least-32-chars
 >
 > 注意：配置文件中的 `${VAR:默认值}` 会优先读取环境变量，未设置时使用占位值（如 `sk-placeholder`、`your-mysql-password`），会导致对应功能不可用。生产环境务必设置真实密钥，并保持所有服务的 `JWT_SECRET` 一致。
 
-## 📚 文档
+## 文档
 
-- [📘 API 接口设计](docs/api/AI-Interview-API接口设计.md)
-- [🏗️ 系统架构设计](docs/architecture/04-系统架构设计.md)
-- [🗄️ 数据库设计](docs/database/01-数据库设计.md)
-- [📝 需求设计文档](docs/product/02-需求设计文档.md)
-- [🐳 Docker 部署指南](docker/README.md)
+- [API 接口设计](docs/api/AI-Interview-API接口设计.md)
+- [系统架构设计](docs/architecture/04-系统架构设计.md)
+- [数据库设计](docs/database/01-数据库设计.md)
+- [需求设计文档](docs/product/02-需求设计文档.md)
+- [Docker 部署指南](docker/README.md)
 
-## 📄 License
+## License
 
-[![License MIT](https://img.shields.io/badge/License-MIT-blue?logo=github&logoColor=white)](https://opensource.org/licenses/MIT)
-
-本项目基于 **MIT** 协议开源。
+本项目基于 [MIT](https://opensource.org/licenses/MIT) 协议开源。
