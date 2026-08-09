@@ -17,6 +17,7 @@
           <a class="sn-link active" @click="$router.push('/lobby')">✦ 面试大厅</a>
           <a class="sn-link" @click="$router.push('/resume')">📄 我的简历</a>
           <a class="sn-link" @click="$router.push('/history')">📋 练习记录</a>
+          <a class="sn-link" @click="$router.push('/agent-interview')" style="color:var(--color-accent);font-weight:500">✦ Agent 面试</a>
           <a v-if="userStore.isAdmin" class="sn-link" @click="$router.push('/admin')">⚙️ 管理</a>
         </nav>
       </div>
@@ -24,9 +25,9 @@
         <p class="eyebrow" style="margin-bottom:var(--spacing-2)">Tip</p>
         <p class="text-sm" style="color:var(--color-text-body);line-height:1.6">回答问题时先给出核心结论，再用具体案例展开说明。STAR 法则是最常用的结构化表达方式。</p>
       </div>
-      <button class="btn btn--primary btn--full btn--lg" @click="showCreateModal = true">
+      <button class="btn btn--primary btn--full btn--lg" @click="$router.push('/agent-interview')">
         <span style="font-size:18px;margin-right:4px">✦</span>
-        开始面试
+        开始 Agent 面试
       </button>
     </aside>
 
@@ -51,9 +52,9 @@
       </div>
 
       <div class="job-grid">
-        <div v-for="job in filteredJobs" :key="job.id" class="card card--interactive" style="padding:var(--spacing-5);cursor:pointer" @click="startInterview(job)">
+        <div v-for="job in filteredJobs" :key="job.id" class="card card--interactive" style="padding:var(--spacing-5);cursor:pointer" @click="goInterview(job)">
           <div class="job-top">
-            <span class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.04em">AI 面试</span>
+            <span class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.04em">Agent 面试</span>
             <span class="tag" :class="'tag--' + (job.level === '初级' || job.level === 'EASY' ? 'easy' : job.level === '高级' || job.level === 'HARD' ? 'hard' : 'medium')">{{ levelText(job.level) }}</span>
           </div>
           <h4 style="margin:8px 0 4px">{{ job.name }}</h4>
@@ -92,33 +93,6 @@
         </div>
       </div>
     </aside>
-
-    <!-- Modal -->
-    <teleport to="body">
-      <transition name="fade">
-        <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
-          <div class="card" style="width:100%;max-width:420px;padding:0;overflow:hidden">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--spacing-5) var(--spacing-6)">
-              <h4>创建面试</h4>
-              <button class="btn btn--ghost btn--icon" @click="showCreateModal = false" style="font-size:18px">✕</button>
-            </div>
-            <div style="padding:0 var(--spacing-6) var(--spacing-5)">
-              <div class="form-group"><label class="form-label">岗位方向</label>
-                <select class="form-select" v-model="createForm.jobName"><option value="">请选择</option><option v-for="job in jobs" :key="job.id" :value="job.name">{{ job.name }}</option></select>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label class="form-label">难度</label><select class="form-select" v-model="createForm.difficulty"><option>初级</option><option>中级</option><option>高级</option></select></div>
-                <div class="form-group"><label class="form-label">模式</label><select class="form-select" v-model="createForm.mode"><option value="TEXT">文字</option><option value="VOICE">语音</option><option value="VIDEO">视频</option></select></div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;padding:var(--spacing-4) var(--spacing-6);border-top:1px solid var(--color-divider)">
-              <button class="btn btn--ghost" @click="showCreateModal = false">取消</button>
-              <button class="btn btn--primary" @click="createInterview">开始</button>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </teleport>
   </div>
 </template>
 
@@ -130,11 +104,10 @@ import { levelText } from '@/utils/constants'
 import api from '@/api'
 
 const router = useRouter(); const userStore = useUserStore()
-const showCreateModal = ref(false); const searchQuery = ref('')
+const searchQuery = ref('')
 const filterDirection = ref('全部'); const filterLevel = ref('全部')
 const interviewCount = ref(0); const avgScore = ref('-')
 const jobs = ref([]); const hotQuestions = ref([])
-const createForm = ref({ jobName: '', difficulty: '中级', mode: 'TEXT' })
 
 const directions = ['全部','前端开发','后端开发','移动开发','数据','测试','运维','产品','设计']
 const levels = ['全部','初级','中级','高级']
@@ -165,13 +138,9 @@ const loadData = async () => {
   } catch (e) { console.warn(e) }
 }
 
-const startInterview = (job) => { createForm.value.jobName = job.name; showCreateModal.value = true }
-const createInterview = async () => {
-  if (!createForm.value.jobName) return
-  try {
-    const res = await api.post('/interview/create', { userId: userStore.userId, jobName: createForm.value.jobName, mode: createForm.value.mode, difficulty: createForm.value.difficulty })
-    showCreateModal.value = false; router.push(`/interview/${res.data.id}`)
-  } catch {}
+/** 进入 Agent 面试，携带所选岗位 */
+const goInterview = (job) => {
+  router.push({ path: '/agent-interview', query: job ? { job: job.name } : undefined })
 }
 </script>
 
@@ -219,8 +188,6 @@ const createInterview = async () => {
 .ps { text-align:center; }
 .ps .ps-v { display:block; font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--color-accent); }
 .ps .ps-l { font-size:11px; color:var(--color-text-secondary); }
-
-.modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,0.3); display:flex; align-items:center; justify-content:center; z-index:200; padding:var(--spacing-4); }
 
 @media (max-width:1024px) {
   .lobby-grid { grid-template-columns:1fr; }

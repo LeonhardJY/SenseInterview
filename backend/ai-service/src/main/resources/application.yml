@@ -35,6 +35,26 @@ ai:
       api-url: https://api.deepseek.com
       model: deepseek-v4-flash
 
+  # RAG 检索增强配置
+  rag:
+    # 向量化模型（本地 Ollama，nomic-embed-text 维度 768）
+    embedding:
+      base-url: http://localhost:11434
+      model: nomic-embed-text
+    # 向量数据库（本地 Qdrant）
+    qdrant:
+      host: localhost
+      port: 6333
+      collection: interview_knowledge
+      dimension: 768
+    # 知识源目录（classpath:knowledge 下按公司分类的 md 文件）
+    knowledge-dir: classpath:knowledge
+    # 检索返回条数
+    top-k: 4
+
+  # question-service 直连地址（Agent 查题库用，本地开发直连 8083）
+  question-service-url: http://localhost:8083
+
   # 音频上传配置
   upload:
     audio-dir: ./uploads/audio

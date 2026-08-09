@@ -88,25 +88,6 @@ public class FaceAnalysisService {
         }
     }
 
-    /**
-     * 健康检查
-     */
-    public boolean isHealthy() {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(emotionServiceUrl + "/health"))
-                    .timeout(Duration.ofSeconds(3))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request,
-                    HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     // ========== 结果模型 ==========
 
     public record EmotionResult(

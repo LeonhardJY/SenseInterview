@@ -25,4 +25,13 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
         wrapper.eq(QuestionBank::getLevel, level);
         return list(wrapper);
     }
+
+    @Override
+    public List<QuestionBank> findByKeyword(String keyword) {
+        LambdaQueryWrapper<QuestionBank> wrapper = new LambdaQueryWrapper<>();
+        wrapper.and(w -> w.like(QuestionBank::getTitle, keyword)
+                        .or().like(QuestionBank::getAnswer, keyword))
+                .last("LIMIT 10");
+        return list(wrapper);
+    }
 }

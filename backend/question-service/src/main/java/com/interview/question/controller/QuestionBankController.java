@@ -39,6 +39,13 @@ public class QuestionBankController {
         return Result.success(list);
     }
 
+    @Operation(summary = "关键词搜索题目")
+    @GetMapping("/search")
+    public Result<List<QuestionBank>> search(@RequestParam("keyword") String keyword) {
+        List<QuestionBank> list = questionBankService.findByKeyword(keyword);
+        return Result.success(list);
+    }
+
     @Operation(summary = "新增题目")
     @PostMapping("/add")
     public Result<Void> add(@RequestBody QuestionBank questionBank) {

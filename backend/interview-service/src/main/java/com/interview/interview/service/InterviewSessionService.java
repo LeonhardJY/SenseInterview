@@ -34,32 +34,7 @@ public interface InterviewSessionService {
     void addQaRecord(Long taskId, String question, String answer);
 
     /**
-     * 记录一次情绪分析结果
-     */
-    void addEmotionRecord(Long taskId, String emotion, Double confidence);
-
-    /**
      * 更新面试状态
      */
     void updateStatus(Long taskId, String status);
-
-    /**
-     * 获取当前轮次
-     */
-    Integer getCurrentRound(Long taskId);
-
-    /**
-     * 获取历史对话文本（给 LLM 用）
-     */
-    String getHistoryText(Long taskId);
-
-    /**
-     * 删除会话缓存（面试结束后清理）
-     */
-    void removeSession(Long taskId);
-
-    /**
-     * 检查会话是否存在
-     */
-    boolean hasSession(Long taskId);
 }

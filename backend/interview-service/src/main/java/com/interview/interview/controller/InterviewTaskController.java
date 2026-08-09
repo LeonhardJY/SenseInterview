@@ -232,8 +232,13 @@ public class InterviewTaskController {
     @GetMapping("/interview/stats")
     public Result<InterviewStats> getInterviewStats() {
         long totalInterviews = interviewTaskService.count();
-        long completedInterviews = interviewTaskService.lambdaQuery().eq(InterviewTask::getStatus, "COMPLETED").count();
-        long inProgressInterviews = interviewTaskService.lambdaQuery().eq(InterviewTask::getStatus, "IN_PROGRESS").count();
+        // 完成任务可能是 FINISHED 或 COMPLETED（历史数据兼容）
+        long completedInterviews = interviewTaskService.lambdaQuery()
+                .and(w -> w.eq(InterviewTask::getStatus, "FINISHED").or().eq(InterviewTask::getStatus, "COMPLETED"))
+                .count();
+        long inProgressInterviews = interviewTaskService.lambdaQuery()
+                .and(w -> w.eq(InterviewTask::getStatus, "RUNNING").or().eq(InterviewTask::getStatus, "IN_PROGRESS"))
+                .count();
 
         InterviewStats stats = new InterviewStats();
         stats.setTotalInterviews(totalInterviews);
@@ -245,11 +250,14 @@ public class InterviewTaskController {
     @Operation(summary = "获取面试趋势（近7天）")
     @GetMapping("/interview/trend")
     public Result<List<TrendItem>> getInterviewTrend() {
-        List<InterviewTask> list = interviewTaskService.list();
+        // 仅查询近 7 天数据，由 SQL 层过滤（WHERE create_time >= ?），避免全表加载后在内存过滤
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDateTime start = today.minusDays(6).atStartOfDay();
+        List<InterviewTask> list = interviewTaskService.lambdaQuery()
+                .ge(InterviewTask::getCreateTime, start)
+                .list();
         List<TrendItem> trend = new java.util.ArrayList<>();
 
-        // 统计近7天的面试数量
-        java.time.LocalDate today = java.time.LocalDate.now();
         for (int i = 6; i >= 0; i--) {
             java.time.LocalDate date = today.minusDays(i);
             long count = list.stream()

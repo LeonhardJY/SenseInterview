@@ -107,6 +107,7 @@ services:
     environment:
       SPRING_REDIS_HOST: redis
       JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-char-secret}
+      SENSE_LLM_KEY: ${SENSE_LLM_KEY:-sk-placeholder}
       SERVER_ADDRESS: 0.0.0.0
     depends_on:
       - redis

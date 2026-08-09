@@ -78,18 +78,6 @@ public class InterviewSessionServiceImpl implements InterviewSessionService {
     }
 
     @Override
-    public void addEmotionRecord(Long taskId, String emotion, Double confidence) {
-        InterviewContext context = getContext(taskId);
-        if (context == null) {
-            log.warn("面试会话不存在，无法添加情绪记录 — taskId: {}", taskId);
-            return;
-        }
-        context.addEmotion(emotion, confidence);
-        setContext(taskId, context);
-        log.debug("情绪记录已添加 — taskId: {}, emotion: {}, confidence: {}", taskId, emotion, confidence);
-    }
-
-    @Override
     public void updateStatus(Long taskId, String status) {
         InterviewContext context = getContext(taskId);
         if (context == null) {
@@ -104,34 +92,5 @@ public class InterviewSessionServiceImpl implements InterviewSessionService {
         }
         setContext(taskId, context);
         log.info("面试状态已更新 — taskId: {}, status: {}", taskId, status);
-    }
-
-    @Override
-    public Integer getCurrentRound(Long taskId) {
-        InterviewContext context = getContext(taskId);
-        return context != null ? context.getCurrentRound() : 0;
-    }
-
-    @Override
-    public String getHistoryText(Long taskId) {
-        InterviewContext context = getContext(taskId);
-        if (context == null) {
-            return "";
-        }
-        return context.buildHistoryText();
-    }
-
-    @Override
-    public void removeSession(Long taskId) {
-        String key = buildKey(taskId);
-        redisTemplate.delete(key);
-        log.info("面试会话已清除 — taskId: {}", taskId);
-    }
-
-    @Override
-    public boolean hasSession(Long taskId) {
-        String key = buildKey(taskId);
-        Boolean exists = redisTemplate.hasKey(key);
-        return Boolean.TRUE.equals(exists);
     }
 }

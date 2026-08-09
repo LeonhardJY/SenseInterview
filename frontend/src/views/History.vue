@@ -36,9 +36,8 @@
         <div v-if="item.score != null" class="score-dot" :class="'sd-' + scoreLevel(item.score)">{{ item.score }}</div>
         <div v-else class="score-dot sd-none">-</div>
         <div style="display:flex;gap:6px;flex-shrink:0" @click.stop>
-          <button v-if="item.status === 'FINISHED' || item.status === 'COMPLETED'" class="btn btn--sm btn--primary" @click="viewReport(item)">报告</button>
-          <button v-else class="btn btn--sm btn--ghost" @click="continueInterview(item)">继续</button>
-          <button class="btn btn--sm btn--ghost" @click="confirmDelete(item)">删除</button>
+          <button v-if="item.status === 'FINISHED' || item.status === 'COMPLETED'" class="btn btn--primary" @click="viewReport(item)">查看报告</button>
+          <button class="btn btn--ghost" @click="confirmDelete(item)">删除</button>
         </div>
       </div>
       <div v-if="filteredList.length === 0" class="empty-state">
@@ -115,7 +114,6 @@ const loadHistory = async () => {
 }
 const viewDetail = (item) => { selectedItem.value = item; showDetailModal.value = true }
 const viewReport = (item) => { showDetailModal.value = false; router.push(`/report/${item.id}`) }
-const continueInterview = (item) => { router.push(`/interview/${item.id}`) }
 const confirmDelete = (item) => {
   ElMessageBox.confirm(`确定删除「${item.jobName}」的记录？`,'确认删除',{ confirmButtonText:'确定删除', cancelButtonText:'取消', type:'warning' })
     .then(async () => { await api.delete(`/interview/${item.id}`); ElMessage.success('已删除'); loadHistory() }).catch(() => {})

@@ -36,9 +36,26 @@ api.interceptors.response.use(
     return res
   },
   (error) => {
-    ElMessage.error(error.message || '网络错误')
+    // 超时错误给出友好提示
+    if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+      ElMessage.error('请求超时，请稍后重试')
+    } else {
+      ElMessage.error(error.message || '网络错误')
+    }
     return Promise.reject(error)
   }
 )
 
 export default api
+
+// ========== Agent 面试 ==========
+
+// Agent 对话涉及 DeepSeek 生成 + 工具调用，耗时较长，单独放宽超时
+const LONG_TIMEOUT = 120000
+
+/** Agent 面试官对话 */
+export const agentChat = (sessionId, message) =>
+  api.post('/ai/agent-chat', { sessionId, message }, { timeout: LONG_TIMEOUT })
+
+/** 结束 Agent 面试会话 */
+export const agentEnd = (sessionId) => api.post('/ai/agent-end', { sessionId })

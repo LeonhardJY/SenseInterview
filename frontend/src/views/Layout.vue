@@ -8,6 +8,7 @@
         </button>
         <nav class="header__nav">
           <button :class="['header__link', { 'header__link--active': $route.path === '/lobby' }]" @click="$router.push('/lobby')">面试大厅</button>
+          <button :class="['header__link', { 'header__link--active': $route.path === '/agent-interview' }]" @click="$router.push('/agent-interview')" style="color:var(--color-accent)">✦ Agent</button>
           <button :class="['header__link', { 'header__link--active': $route.path === '/history' }]" @click="$router.push('/history')">练习记录</button>
           <button :class="['header__link', { 'header__link--active': $route.path === '/resume' }]" @click="$router.push('/resume')">简历</button>
           <button v-if="userStore.isAdmin" :class="['header__link', { 'header__link--active': $route.path.startsWith('/admin') }]" @click="$router.push('/admin')">管理</button>

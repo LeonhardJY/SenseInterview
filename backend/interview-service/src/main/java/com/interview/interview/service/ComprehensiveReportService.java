@@ -2,6 +2,7 @@ package com.interview.interview.service;
 
 import com.interview.interview.entity.AiAnalysisRecord;
 import com.interview.interview.entity.EvaluationReport;
+import com.interview.interview.entity.InterviewAnswer;
 import com.interview.interview.entity.InterviewRecord;
 import com.interview.interview.entity.InterviewTask;
 import com.interview.interview.model.ComprehensiveReportVO;
@@ -28,6 +29,7 @@ public class ComprehensiveReportService {
     private final EvaluationReportService evaluationReportService;
     private final AiAnalysisRecordService aiAnalysisRecordService;
     private final InterviewRecordService interviewRecordService;
+    private final InterviewAnswerService interviewAnswerService;
 
     /** 情绪中文映射 */
     private static final Map<String, String> EMOTION_LABELS = Map.of(
@@ -165,11 +167,14 @@ public class ComprehensiveReportService {
     }
 
     /**
-     * 构建问答记录
+     * 构建问答记录（含答案，按轮次排序）
      */
     private List<ComprehensiveReportVO.QaRecord> buildQaRecords(Long taskId) {
         List<InterviewRecord> records = interviewRecordService.findByTaskId(taskId);
         if (records == null || records.isEmpty()) return List.of();
+
+        // 按轮次升序排序，保证 transcript 顺序正确
+        records.sort(Comparator.comparing(r -> r.getRoundNum() != null ? r.getRoundNum() : Integer.MAX_VALUE));
 
         List<ComprehensiveReportVO.QaRecord> result = new ArrayList<>();
         for (int i = 0; i < records.size(); i++) {
@@ -177,7 +182,14 @@ public class ComprehensiveReportService {
             ComprehensiveReportVO.QaRecord qa = new ComprehensiveReportVO.QaRecord();
             qa.setRound(r.getRoundNum() != null ? r.getRoundNum() : i + 1);
             qa.setQuestion(r.getQuestion());
-            qa.setAnswer(""); // 可以从 interview_answer 表补充
+
+            // 从 interview_answer 表加载该轮的回答
+            List<InterviewAnswer> answers = interviewAnswerService.findByRecordId(r.getId());
+            if (!answers.isEmpty()) {
+                qa.setAnswer(answers.get(0).getAnswerText());
+            } else {
+                qa.setAnswer("");
+            }
             result.add(qa);
         }
         return result;

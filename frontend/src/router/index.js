@@ -20,12 +20,6 @@ const routes = [
         meta: { title: '面试大厅' }
       },
       {
-        path: 'interview/:taskId',
-        name: 'Interview',
-        component: () => import('@/views/Interview.vue'),
-        meta: { title: '面试房间' }
-      },
-      {
         path: 'report/:taskId',
         name: 'Report',
         component: () => import('@/views/Report.vue'),
@@ -48,6 +42,12 @@ const routes = [
         name: 'QuestionBank',
         component: () => import('@/views/QuestionBank.vue'),
         meta: { title: '面试题库' }
+      },
+      {
+        path: 'agent-interview',
+        name: 'AgentInterview',
+        component: () => import('@/views/AgentInterview.vue'),
+        meta: { title: 'Agent 面试' }
       },
       {
         path: 'admin',

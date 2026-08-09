@@ -10,4 +10,6 @@ public interface QuestionBankService extends IService<QuestionBank> {
     List<QuestionBank> findByCategory(String category);
 
     List<QuestionBank> findByLevel(String level);
+
+    List<QuestionBank> findByKeyword(String keyword);
 }

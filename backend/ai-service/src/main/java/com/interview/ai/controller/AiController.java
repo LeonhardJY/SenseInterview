@@ -1,20 +1,15 @@
 package com.interview.ai.controller;
 
-import com.interview.ai.service.AsrService;
+import com.interview.ai.service.AgentInterviewService;
 import com.interview.ai.service.FaceAnalysisService;
-import com.interview.ai.service.LlmService;
-import com.interview.ai.service.NlpService;
+import com.interview.ai.service.RagService;
 import com.interview.common.result.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "AI服务", description = "AI相关接口")
 @RestController
@@ -22,48 +17,38 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiController {
 
-    private final AsrService asrService;
-    private final NlpService nlpService;
-    private final LlmService llmService;
     private final FaceAnalysisService faceAnalysisService;
+    private final RagService ragService;
+    private final AgentInterviewService agentInterviewService;
 
-    @Operation(summary = "文本语义分析")
-    @PostMapping("/analyze-text")
-    public Result<Map<String, Object>> analyzeText(@RequestParam("text") String text) {
-        Map<String, Object> result = nlpService.analyzeText(text);
-        return Result.success(result);
+    // ========== Agent 面试官 & RAG ==========
+
+    @Operation(summary = "Agent 面试官对话（可自主调用工具检索知识库/题库）")
+    @PostMapping("/agent-chat")
+    public Result<String> agentChat(@RequestBody AgentChatRequest request) {
+        String answer = agentInterviewService.chat(request.getSessionId(), request.getMessage());
+        return Result.success(answer);
     }
 
-    @Operation(summary = "生成面试问题")
-    @PostMapping("/generate-question")
-    public Result<String> generateQuestion(@RequestParam("jobName") String jobName, @RequestParam("difficulty") String difficulty) {
-        String question = llmService.generateQuestion(jobName, difficulty);
-        return Result.success(question);
+    @Operation(summary = "结束 Agent 面试会话（释放记忆）")
+    @PostMapping("/agent-end")
+    public Result<Void> agentEnd(@RequestBody AgentChatRequest request) {
+        agentInterviewService.clearSession(request.getSessionId());
+        return Result.success();
     }
 
-    @Operation(summary = "生成追问")
-    @PostMapping("/generate-follow-up")
-    public Result<String> generateFollowUp(@RequestParam("question") String question, @RequestParam("answer") String answer) {
-        String followUp = llmService.generateFollowUp(question, answer);
-        return Result.success(followUp);
+    @Operation(summary = "重建 RAG 知识库索引（从 knowledge 目录向量化写入 Qdrant）")
+    @PostMapping("/rag/rebuild")
+    public Result<Integer> rebuildRagIndex() {
+        int count = ragService.rebuildIndex();
+        return Result.success(count);
     }
 
-    @Operation(summary = "生成追问（带历史上下文）")
-    @PostMapping("/generate-follow-up-with-history")
-    public Result<String> generateFollowUpWithHistory(@RequestBody FollowUpWithHistoryRequest request) {
-        String followUp = llmService.generateFollowUpWithHistory(
-                request.getHistory(),
-                request.getCurrentQuestion(),
-                request.getCurrentAnswer()
-        );
-        return Result.success(followUp);
-    }
-
-    @Operation(summary = "生成面试评价")
-    @PostMapping("/generate-evaluation")
-    public Result<String> generateEvaluation(@RequestBody EvaluationRequest request) {
-        String evaluation = llmService.generateEvaluation(request.getQuestions(), request.getAnswers());
-        return Result.success(evaluation);
+    @Operation(summary = "RAG 知识库检索测试")
+    @PostMapping("/rag/retrieve")
+    public Result<List<String>> ragRetrieve(@RequestBody RagRetrieveRequest request) {
+        List<String> docs = ragService.retrieve(request.getQuery());
+        return Result.success(docs);
     }
 
     // ========== 情绪分析 ==========
@@ -75,42 +60,15 @@ public class AiController {
         return Result.success(result);
     }
 
-    // ========== 流式接口 (SSE) ==========
-
-    @Operation(summary = "流式生成面试问题（SSE逐字推送）")
-    @PostMapping(value = "/generate-question-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamGenerateQuestion(@RequestBody Map<String, String> params) {
-        String jobName = params.getOrDefault("jobName", "Java开发");
-        String difficulty = params.getOrDefault("difficulty", "中级");
-        SseEmitter emitter = new SseEmitter(180000L);
-        llmService.streamGenerateQuestion(emitter, jobName, difficulty);
-        return emitter;
-    }
-
-    @Operation(summary = "流式生成追问（带历史上下文，SSE逐字推送）")
-    @PostMapping(value = "/generate-follow-up-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamGenerateFollowUp(@RequestBody FollowUpWithHistoryRequest request) {
-        SseEmitter emitter = new SseEmitter(180000L);
-        llmService.streamGenerateFollowUpWithHistory(
-                emitter,
-                request.getHistory(),
-                request.getCurrentQuestion(),
-                request.getCurrentAnswer()
-        );
-        return emitter;
+    @lombok.Data
+    public static class AgentChatRequest {
+        private String sessionId;
+        private String message;
     }
 
     @lombok.Data
-    public static class EvaluationRequest {
-        private String[] questions;
-        private String[] answers;
-    }
-
-    @lombok.Data
-    public static class FollowUpWithHistoryRequest {
-        private List<Map<String, String>> history;
-        private String currentQuestion;
-        private String currentAnswer;
+    public static class RagRetrieveRequest {
+        private String query;
     }
 
     @lombok.Data

@@ -68,11 +68,9 @@ backend/
 ├── gateway-service/           # 网关服务：路由转发、JWT 鉴权
 ├── user-service/              # 用户服务：登录注册、简历管理
 ├── interview-service/         # 面试服务：任务管理、问答记录、会话缓存、
-│                               WebSocket、报告生成、LangChain4j 记忆
+│                               WebSocket、报告生成
 ├── question-service/          # 题库服务：题目 CRUD
-├── evaluation-service/        # 评测服务：评测记录
-├── report-service/            # 报告服务：报告存储
-└── ai-service/                # AI 服务：LLM 编排、SSE 流式、情绪分析客户端
+└── ai-service/                # AI 服务：Agent 面试官（langchain4j+RAG）、情绪分析客户端
 
 emotion-service/               # DeepFace 情绪识别 Python 微服务
 
@@ -129,11 +127,10 @@ python app.py                               # 端口 5000
 
 | 服务 | 端口 | 服务 | 端口 |
 |------|------|------|------|
-| 网关服务 | 8080 | 评测服务 | 8084 |
-| 用户服务 | 8081 | 报告服务 | 8085 |
-| 面试服务 | 8082 | AI 服务 | 8086 |
-| 题库服务 | 8083 | 前端开发服务器 | 3000 |
-| DeepFace 情绪服务 | 5000 |  |  |
+| 网关服务 | 8080 | AI 服务 | 8086 |
+| 用户服务 | 8081 | 前端开发服务器 | 3000 |
+| 面试服务 | 8082 | DeepFace 情绪服务 | 5000 |
+| 题库服务 | 8083 |  |  |
 
 ### Docker 部署
 

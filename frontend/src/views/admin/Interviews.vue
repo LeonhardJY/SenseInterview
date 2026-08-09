@@ -12,7 +12,7 @@
     <div class="filter-bar">
       <select v-model="filterStatus" class="filter-select form-select">
         <option value="">全部状态</option>
-        <option value="COMPLETED">已完成</option>
+        <option value="DONE">已完成</option>
         <option value="IN_PROGRESS">进行中</option>
         <option value="CREATED">待开始</option>
       </select>
@@ -56,7 +56,7 @@
             <td>{{ formatDate(item.endTime) }}</td>
             <td>
               <div class="action-btns">
-                <button class="btn btn--sm btn--primary" @click="viewReport(item)" v-if="item.status === 'COMPLETED'">
+                <button class="btn btn--sm btn--primary" @click="viewReport(item)" v-if="item.status === 'COMPLETED' || item.status === 'FINISHED'">
                   查看报告
                 </button>
                 <button class="btn btn--sm btn--danger" @click="deleteInterview(item)">
@@ -88,7 +88,8 @@ const filterMode = ref('')
 
 const filteredInterviews = computed(() => {
   return interviews.value.filter(item => {
-    if (filterStatus.value && item.status !== filterStatus.value) return false
+    if (filterStatus.value === 'DONE' && item.status !== 'COMPLETED' && item.status !== 'FINISHED') return false
+    if (filterStatus.value && filterStatus.value !== 'DONE' && item.status !== filterStatus.value) return false
     if (filterMode.value && item.mode !== filterMode.value) return false
     return true
   })
@@ -117,7 +118,7 @@ const modeText = (mode) => {
 }
 
 const statusText = (status) => {
-  const map = { CREATED: '待开始', IN_PROGRESS: '进行中', COMPLETED: '已完成' }
+  const map = { CREATED: '待开始', IN_PROGRESS: '进行中', COMPLETED: '已完成', FINISHED: '已完成' }
   return map[status] || status || '-'
 }
 
@@ -218,7 +219,8 @@ const deleteInterview = async (item) => {
   color: var(--color-accent);
 }
 
-.status-tag.completed {
+.status-tag.completed,
+.status-tag.finished {
   background: var(--color-success-light);
   color: var(--color-success);
 }
