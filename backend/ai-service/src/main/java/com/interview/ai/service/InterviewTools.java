@@ -2,6 +2,7 @@ package com.interview.ai.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.interview.common.utils.RestTemplateUtils;
 import dev.langchain4j.agent.tool.Tool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,8 @@ import java.util.List;
 public class InterviewTools {
 
     private final RagService ragService;
-    private final RestTemplate restTemplate = new RestTemplate();
+    // 调用 question-service 内部接口：连接 3s、读取 10s 超时
+    private final RestTemplate restTemplate = RestTemplateUtils.build(3000, 10000);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${ai.question-service-url:http://localhost:8083}")

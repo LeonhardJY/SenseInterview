@@ -42,8 +42,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/doc.html/**",
-            "/webjars/**",
-            "/ws/**"
+            "/webjars/**"
     );
 
     @Override
@@ -57,7 +56,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         // 获取token
-        String token = getTokenFromRequest(request);
+        String token = resolveToken(request);
         if (!StringUtils.hasText(token)) {
             return unauthorizedResponse(exchange, "令牌不能为空");
         }
@@ -77,14 +76,29 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
     }
 
-    private boolean isWhiteListed(String path) {
+    boolean isWhiteListed(String path) {
         return WHITE_LIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
-    private String getTokenFromRequest(ServerHttpRequest request) {
+    String resolveToken(ServerHttpRequest request) {
         String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+        // WebSocket 握手无法自定义 Authorization 头，回退到 query 参数 token（如 ws://.../ws/interview/1?token=JWT）
+        return extractQueryParam(request.getURI().getQuery(), "token");
+    }
+
+    /** 从 URL query 字符串中提取指定参数值（供 WebSocket 握手鉴权用）。 */
+    static String extractQueryParam(String query, String name) {
+        if (query == null || query.isEmpty()) {
+            return null;
+        }
+        for (String param : query.split("&")) {
+            String[] kv = param.split("=", 2);
+            if (kv.length == 2 && name.equals(kv[0])) {
+                return kv[1];
+            }
         }
         return null;
     }

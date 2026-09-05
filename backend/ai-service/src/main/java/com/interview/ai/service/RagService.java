@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.interview.common.utils.RestTemplateUtils;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
@@ -61,7 +62,8 @@ public class RagService {
     private int topK;
 
     private EmbeddingModel embeddingModel;
-    private final RestTemplate restTemplate = new RestTemplate();
+    // 调用 Qdrant REST：连接 5s、读取 60s 超时，避免向量库无响应时调用线程无限阻塞
+    private final RestTemplate restTemplate = RestTemplateUtils.build(5000, 60000);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /** 本地向量缓存：pointId → {embedding, text, metadata} */

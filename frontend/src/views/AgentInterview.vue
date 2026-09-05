@@ -211,7 +211,7 @@ import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store'
-import api, { agentChat, agentEnd } from '@/api'
+import api, { agentChatStream, agentEnd } from '@/api'
 import { renderMarkdown } from '@/utils/markdown'
 import { modeText } from '@/utils/constants'
 import CameraFeed from '@/components/CameraFeed.vue'
@@ -435,15 +435,33 @@ const sendMessage = async () => {
       await submitAnswer(userMsg)
     }
 
-    const res = await agentChat(sessionId.value, userMsg)
-    removeLoading()
-    const aiMsg = res.data
-    currentQuestion.value = aiMsg
-    addMessage('ai', aiMsg, ['知识库检索'])
-
-    if (mode.value === 'VOICE' && !ended.value) {
-      setTimeout(() => startVoice(), 400)
-    }
+    // 流式接收：首 token 到达时把 loading 占位替换为逐步增长的 AI 气泡
+    let aiMsgRef = null
+    let acc = ''
+    await agentChatStream(sessionId.value, userMsg, {
+      onToken: (t) => {
+        if (!aiMsgRef) {
+          removeLoading()
+          addMessage('ai', '', ['知识库检索'])
+          aiMsgRef = messages.value[messages.value.length - 1]
+        }
+        acc += t
+        aiMsgRef.content = acc
+        scrollToBottom()
+      },
+      onComplete: () => {
+        if (!aiMsgRef) removeLoading()
+        currentQuestion.value = acc
+        if (mode.value === 'VOICE' && !ended.value) {
+          setTimeout(() => startVoice(), 400)
+        }
+      },
+      onError: (err) => {
+        removeLoading()
+        if (!aiMsgRef) addMessage('ai', '抱歉，面试官暂时无法回应。请确认后端服务已启动后重试。')
+        console.error('[Agent Stream]', err)
+      }
+    })
   } catch (e) {
     removeLoading()
     addMessage('ai', '抱歉，面试官暂时无法回应。请确认后端服务已启动后重试。')

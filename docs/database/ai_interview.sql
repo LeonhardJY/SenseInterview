@@ -32,7 +32,10 @@ CREATE TABLE interview_task (
  start_time DATETIME,
  end_time DATETIME,
  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
- INDEX idx_user_id(user_id)
+ INDEX idx_user_id(user_id),
+ INDEX idx_create_time(create_time),
+ INDEX idx_job_name(job_name),
+ INDEX idx_status(status)
 );
 
 CREATE TABLE interview_record (
@@ -40,7 +43,8 @@ CREATE TABLE interview_record (
  task_id BIGINT NOT NULL,
  round_num INT,
  question TEXT,
- create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+ create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+ INDEX idx_task_id(task_id)
 );
 
 CREATE TABLE interview_answer (
@@ -49,7 +53,8 @@ CREATE TABLE interview_answer (
  answer_text TEXT,
  audio_url VARCHAR(255),
  video_url VARCHAR(255),
- create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+ create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+ INDEX idx_record_id(record_id)
 );
 
 CREATE TABLE ai_analysis_record (
@@ -58,7 +63,8 @@ CREATE TABLE ai_analysis_record (
  analysis_type VARCHAR(50),
  result_json JSON,
  score DECIMAL(5,2),
- create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+ create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+ INDEX idx_task_type(task_id, analysis_type)
 );
 
 CREATE TABLE evaluation_report (

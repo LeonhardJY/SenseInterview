@@ -1,5 +1,6 @@
 package com.interview.interview.service.impl;
 
+import com.interview.interview.lock.RedisDistributedLock;
 import com.interview.interview.model.InterviewContext;
 import com.interview.interview.service.InterviewSessionService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,12 @@ public class InterviewSessionServiceImpl implements InterviewSessionService {
 
     private static final String SESSION_KEY_PREFIX = "interview:session:";
     private static final long SESSION_EXPIRE_HOURS = 2;
+    /** 会话读改写的分布式锁：key 前缀与 TTL（毫秒） */
+    private static final String LOCK_KEY_PREFIX = "lock:";
+    private static final long LOCK_TTL_MS = 10_000L;
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisDistributedLock distributedLock;
 
     private String buildKey(Long taskId) {
         return SESSION_KEY_PREFIX + taskId;
@@ -67,14 +72,27 @@ public class InterviewSessionServiceImpl implements InterviewSessionService {
 
     @Override
     public void addQaRecord(Long taskId, String question, String answer) {
-        InterviewContext context = getContext(taskId);
-        if (context == null) {
-            log.warn("面试会话不存在，无法添加问答记录 — taskId: {}", taskId);
+        // 临界区加分布式锁：addQaRecord 是 get→改→set 整个会话对象的 read-modify-write，
+        // 不加锁时并发提交会互相覆盖丢更新
+        String lockKey = LOCK_KEY_PREFIX + buildKey(taskId);
+        String token = distributedLock.tryLock(lockKey, LOCK_TTL_MS);
+        if (token == null) {
+            // 未抢到锁说明有并发写入；DB 为事实源、缓存可由下次读回源重建，此处跳过以避免覆盖
+            log.warn("未获取到会话锁，跳过本次问答缓存更新以避免并发覆盖 — taskId: {}", taskId);
             return;
         }
-        context.addQa(question, answer);
-        setContext(taskId, context);
-        log.debug("问答记录已添加 — taskId: {}, round: {}", taskId, context.getCurrentRound());
+        try {
+            InterviewContext context = getContext(taskId);
+            if (context == null) {
+                log.warn("面试会话不存在，无法添加问答记录 — taskId: {}", taskId);
+                return;
+            }
+            context.addQa(question, answer);
+            setContext(taskId, context);
+            log.debug("问答记录已添加 — taskId: {}, round: {}", taskId, context.getCurrentRound());
+        } finally {
+            distributedLock.unlock(lockKey, token);
+        }
     }
 
     @Override
