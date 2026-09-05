@@ -59,3 +59,46 @@ export const agentChat = (sessionId, message) =>
 
 /** 结束 Agent 面试会话 */
 export const agentEnd = (sessionId) => api.post('/ai/agent-end', { sessionId })
+
+/**
+ * Agent 面试官流式对话（SSE）：POST + fetch ReadableStream 逐 token 回调。
+ * 相比阻塞式 agentChat，首 token 即到即渲染，显著降低"等全文"的感知延迟。
+ * @param {string} sessionId 会话 ID
+ * @param {string} message   用户消息
+ * @param {{onToken?:Function,onComplete?:Function,onError?:Function}} handlers 回调
+ */
+export const agentChatStream = async (sessionId, message, { onToken, onComplete, onError } = {}) => {
+  const token = localStorage.getItem('token')
+  try {
+    const resp = await fetch('/api/ai/agent-stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ sessionId, message })
+    })
+    if (!resp.ok || !resp.body) throw new Error(`SSE 请求失败: ${resp.status}`)
+
+    const reader = resp.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let buffer = ''
+    for (;;) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      // SSE 帧以空行(\n\n)分隔；一帧内可能有多行 data:（按规范用 \n 连接）
+      const frames = buffer.split('\n\n')
+      buffer = frames.pop() // 末段可能不完整，留到下次拼接
+      for (const frame of frames) {
+        const dataLines = frame.split('\n')
+          .filter(l => l.startsWith('data:'))
+          .map(l => l.slice(5).replace(/^ /, ''))
+        if (dataLines.length) onToken && onToken(dataLines.join('\n'))
+      }
+    }
+    onComplete && onComplete()
+  } catch (e) {
+    onError && onError(e)
+  }
+}

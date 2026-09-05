@@ -1,0 +1,23 @@
+# DeepFace 面部情绪识别微服务镜像
+# 构建上下文为仓库根目录（docker-compose 中 context: ..）
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# DeepFace / TensorFlow / OpenCV 运行所需的系统库
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 libgl1 libgomp1 libsm6 libxext6 libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 先装依赖，利用镜像层缓存
+COPY backend/emotion-service/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/emotion-service/app.py /app/app.py
+COPY backend/emotion-service/download_model.py /app/download_model.py
+
+# 首次启动 app.py 会下载 VGG-Face 权重（约 500MB）并缓存到 ~/.deepface/weights/
+# 如需构建期预下载以加快冷启动，可执行：RUN python download_model.py
+EXPOSE 5000
+
+CMD ["python", "app.py"]

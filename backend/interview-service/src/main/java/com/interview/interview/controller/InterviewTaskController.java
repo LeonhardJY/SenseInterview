@@ -10,13 +10,17 @@ import com.interview.interview.entity.JobPosition;
 import com.interview.interview.service.AiAnalysisRecordService;
 import com.interview.interview.service.EvaluationReportService;
 import com.interview.interview.service.HotQuestionService;
-import com.interview.interview.service.InterviewAnswerService;
+import com.interview.interview.service.InterviewFlowService;
 import com.interview.interview.service.InterviewRecordService;
 import com.interview.interview.service.ComprehensiveReportService;
 import com.interview.interview.service.InterviewSessionService;
 import com.interview.interview.service.InterviewTaskService;
 import com.interview.interview.service.JobPositionService;
+import com.interview.interview.service.InterviewStatsService;
 import com.interview.interview.service.ReportGenerateService;
+import com.interview.interview.model.JobStatItem;
+import com.interview.interview.model.ScoreDistribution;
+import com.interview.interview.model.TrendItem;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "面试管理", description = "面试相关接口")
 @RestController
@@ -38,10 +41,11 @@ public class InterviewTaskController {
     private final AiAnalysisRecordService aiAnalysisRecordService;
     private final JobPositionService jobPositionService;
     private final HotQuestionService hotQuestionService;
-    private final InterviewAnswerService interviewAnswerService;
+    private final InterviewFlowService interviewFlowService;
     private final ReportGenerateService reportGenerateService;
     private final ComprehensiveReportService comprehensiveReportService;
     private final InterviewSessionService sessionService;
+    private final InterviewStatsService interviewStatsService;
 
     @Operation(summary = "创建面试任务")
     @PostMapping("/interview/create")
@@ -97,24 +101,17 @@ public class InterviewTaskController {
     @Operation(summary = "提交回答")
     @PostMapping("/interview/answer")
     public Result<Void> submitAnswer(@RequestBody AnswerRequest request) {
-        // 1. 保存问题到 interview_record
-        InterviewRecord record = interviewRecordService.createRecord(
+        // 1. DB 双写（interview_record + interview_answer）在一个事务内完成，避免"记录写了、回答没写"的脏数据
+        interviewFlowService.recordAnswer(
                 request.getTaskId(),
                 request.getRoundNum(),
-                request.getQuestion()
+                request.getQuestion(),
+                request.getAnswerText(),
+                request.getAudioUrl(),
+                request.getVideoUrl()
         );
 
-        // 2. 保存回答到 interview_answer（之前没写，导致答案丢失）
-        if (request.getAnswerText() != null && !request.getAnswerText().isEmpty()) {
-            interviewAnswerService.createAnswer(
-                    record.getId(),
-                    request.getAnswerText(),
-                    request.getAudioUrl(),
-                    request.getVideoUrl()
-            );
-        }
-
-        // 3. 保存到 Redis 会话上下文（供多轮对话使用）
+        // 2. 事务提交后再写 Redis 会话上下文（供多轮对话使用），避免"DB 回滚但缓存已写"的不一致
         if (request.getAnswerText() != null && !request.getAnswerText().isEmpty()) {
             sessionService.addQaRecord(request.getTaskId(), request.getQuestion(), request.getAnswerText());
         }
@@ -250,83 +247,22 @@ public class InterviewTaskController {
     @Operation(summary = "获取面试趋势（近7天）")
     @GetMapping("/interview/trend")
     public Result<List<TrendItem>> getInterviewTrend() {
-        // 仅查询近 7 天数据，由 SQL 层过滤（WHERE create_time >= ?），避免全表加载后在内存过滤
-        java.time.LocalDate today = java.time.LocalDate.now();
-        java.time.LocalDateTime start = today.minusDays(6).atStartOfDay();
-        List<InterviewTask> list = interviewTaskService.lambdaQuery()
-                .ge(InterviewTask::getCreateTime, start)
-                .list();
-        List<TrendItem> trend = new java.util.ArrayList<>();
-
-        for (int i = 6; i >= 0; i--) {
-            java.time.LocalDate date = today.minusDays(i);
-            long count = list.stream()
-                    .filter(t -> t.getCreateTime() != null &&
-                            t.getCreateTime().toLocalDate().equals(date))
-                    .count();
-
-            TrendItem item = new TrendItem();
-            item.setDate(date.toString());
-            item.setCount(count);
-            trend.add(item);
-        }
-
-        return Result.success(trend);
+        // 按日 SQL 聚合 + 服务层零填充，避免全表加载后内存分组
+        return Result.success(interviewStatsService.getInterviewTrend());
     }
 
     @Operation(summary = "获取岗位热度统计")
     @GetMapping("/interview/job-stats")
     public Result<List<JobStatItem>> getJobStats() {
-        List<InterviewTask> list = interviewTaskService.list();
-        Map<String, Long> jobCountMap = list.stream()
-                .filter(t -> t.getJobName() != null)
-                .collect(java.util.stream.Collectors.groupingBy(
-                        InterviewTask::getJobName,
-                        java.util.stream.Collectors.counting()
-                ));
-
-        List<JobStatItem> jobStats = new java.util.ArrayList<>();
-        jobCountMap.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(10)
-                .forEach(entry -> {
-                    JobStatItem item = new JobStatItem();
-                    item.setJobName(entry.getKey());
-                    item.setCount(entry.getValue());
-                    jobStats.add(item);
-                });
-
-        return Result.success(jobStats);
+        // SQL GROUP BY + ORDER BY + LIMIT 直接取 Top 10，取代全表 list() 内存聚合
+        return Result.success(interviewStatsService.getJobStats());
     }
 
     @Operation(summary = "获取分数分布统计")
     @GetMapping("/interview/score-distribution")
     public Result<List<ScoreDistribution>> getScoreDistribution() {
-        List<EvaluationReport> reports = evaluationReportService.list();
-        List<ScoreDistribution> distribution = new java.util.ArrayList<>();
-
-        // 分数段：0-59, 60-69, 70-79, 80-89, 90-100
-        long[] ranges = new long[5];
-        for (EvaluationReport report : reports) {
-            if (report.getTotalScore() != null) {
-                int score = report.getTotalScore().intValue();
-                if (score < 60) ranges[0]++;
-                else if (score < 70) ranges[1]++;
-                else if (score < 80) ranges[2]++;
-                else if (score < 90) ranges[3]++;
-                else ranges[4]++;
-            }
-        }
-
-        String[] labels = {"0-59", "60-69", "70-79", "80-89", "90-100"};
-        for (int i = 0; i < labels.length; i++) {
-            ScoreDistribution item = new ScoreDistribution();
-            item.setRange(labels[i]);
-            item.setCount(ranges[i]);
-            distribution.add(item);
-        }
-
-        return Result.success(distribution);
+        // 一条 SQL（SUM CASE WHEN）聚合出 5 个分数段，取代全表 list() 内存分桶
+        return Result.success(interviewStatsService.getScoreDistribution());
     }
 
     @lombok.Data
@@ -334,24 +270,6 @@ public class InterviewTaskController {
         private Long totalInterviews;
         private Long completedInterviews;
         private Long inProgressInterviews;
-    }
-
-    @lombok.Data
-    public static class TrendItem {
-        private String date;
-        private Long count;
-    }
-
-    @lombok.Data
-    public static class JobStatItem {
-        private String jobName;
-        private Long count;
-    }
-
-    @lombok.Data
-    public static class ScoreDistribution {
-        private String range;
-        private Long count;
     }
 
     @lombok.Data

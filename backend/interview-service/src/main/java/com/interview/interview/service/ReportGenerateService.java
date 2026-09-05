@@ -2,6 +2,7 @@ package com.interview.interview.service;
 
 import com.interview.interview.controller.InterviewTaskController.GenerateReportRequest.QaItem;
 import com.interview.interview.entity.EvaluationReport;
+import com.interview.common.utils.RestTemplateUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +32,8 @@ public class ReportGenerateService {
     @Value("${ai.model.llm.model}")
     private String model;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    // 调用 DeepSeek LLM 生成评价：连接 5s、读取 120s 超时（LLM 生成耗时长但必须有上限，避免线程无限阻塞）
+    private final RestTemplate restTemplate = RestTemplateUtils.build(5000, 120000);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**

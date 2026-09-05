@@ -1,10 +1,13 @@
 package com.interview.ai.service;
 
+import com.interview.ai.memory.RedisChatMemoryStore;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * 每个会话（sessionId）维护独立的 ChatMemory，LLM 在回答过程中可自主
  * 调用 {@link InterviewTools}（检索知识库、查题库等），实现"先查再答"的 Agent 行为。
+ * <p>
+ * 提供两种交互：{@code chat}（阻塞式，一次性返回全文）与 {@code chatStream}（SSE 流式，逐 token 推送）。
  */
 @Slf4j
 @Service
@@ -32,17 +37,21 @@ public class AgentInterviewService {
     private String modelName;
 
     private final InterviewTools tools;
+    private final RedisChatMemoryStore chatMemoryStore;
     private final ConcurrentHashMap<String, Interviewer> sessions = new ConcurrentHashMap<>();
     private OpenAiChatModel chatModel;
+    private OpenAiStreamingChatModel streamingChatModel;
 
-    public AgentInterviewService(InterviewTools tools) {
+    public AgentInterviewService(InterviewTools tools, RedisChatMemoryStore chatMemoryStore) {
         this.tools = tools;
+        this.chatMemoryStore = chatMemoryStore;
     }
 
-    /** 面试官接口：方法签名即 Agent 的执行入口 */
+    /** 面试官接口：方法签名即 Agent 的执行入口（chat 阻塞式、chatStream 流式，共用同一系统提示词） */
     public interface Interviewer {
 
-        @SystemMessage("""
+        /** 系统提示词（接口字段即 public static final 编译期常量，可被 @SystemMessage 引用） */
+        String PROMPT = """
                 你是一位资深大厂技术面试官，正在主持一场 Java 后端方向的模拟技术面试。
 
                 ## 你的身份
@@ -57,8 +66,13 @@ public class AgentInterviewService {
                 5.【来源】当通过工具检索到题目时，问题开头必须注明来源，例如「这是美团后端的高频真题」
                 6.【语气】直接进入正题，不寒暄、不自我介绍、不总结面试流程
                 7.【反馈】候选人答得不错就一句简短肯定再继续追问；答得差就指出具体问题，不吹捧、不打分报告
-                """)
+                """;
+
+        @SystemMessage(PROMPT)
         String chat(String userMessage);
+
+        @SystemMessage(PROMPT)
+        TokenStream chatStream(String userMessage);
     }
 
     @PostConstruct
@@ -69,21 +83,41 @@ public class AgentInterviewService {
                 .modelName(modelName)
                 .temperature(0.4)
                 .build();
-        log.info("Agent 面试官初始化完成: model={}, url={}", modelName, apiUrl);
+        streamingChatModel = OpenAiStreamingChatModel.builder()
+                .baseUrl(apiUrl)
+                .apiKey(apiKey)
+                .modelName(modelName)
+                .temperature(0.4)
+                .build();
+        log.info("Agent 面试官初始化完成（含流式）: model={}, url={}", modelName, apiUrl);
     }
 
     /**
-     * 按会话对话：首次为该会话创建面试官（含独立记忆），之后复用
+     * 按会话对话（阻塞式）：首次为该会话创建面试官（含独立记忆），之后复用
      */
     public String chat(String sessionId, String userMessage) {
-        Interviewer interviewer = sessions.computeIfAbsent(sessionId, k -> createInterviewer());
+        Interviewer interviewer = sessions.computeIfAbsent(sessionId, this::createInterviewer);
         return interviewer.chat(userMessage);
     }
 
-    private Interviewer createInterviewer() {
-        ChatMemory memory = MessageWindowChatMemory.withMaxMessages(20);
+    /**
+     * 按会话流式对话：返回 langchain4j TokenStream，由 SSE 端点桥接到 SseEmitter 逐 token 推送。
+     */
+    public TokenStream chatStream(String sessionId, String userMessage) {
+        Interviewer interviewer = sessions.computeIfAbsent(sessionId, this::createInterviewer);
+        return interviewer.chatStream(userMessage);
+    }
+
+    private Interviewer createInterviewer(String sessionId) {
+        // 记忆持久化到 Redis（按 sessionId）：会话重启不丢、多实例可共享
+        ChatMemory memory = MessageWindowChatMemory.builder()
+                .id(sessionId)
+                .maxMessages(20)
+                .chatMemoryStore(chatMemoryStore)
+                .build();
         return AiServices.builder(Interviewer.class)
                 .chatLanguageModel(chatModel)
+                .streamingChatLanguageModel(streamingChatModel)
                 .chatMemory(memory)
                 .tools(tools)
                 .build();
@@ -92,6 +126,7 @@ public class AgentInterviewService {
     /** 结束会话，释放该会话的记忆 */
     public void clearSession(String sessionId) {
         sessions.remove(sessionId);
-        log.info("Agent 会话已清除: {}", sessionId);
+        chatMemoryStore.deleteMessages(sessionId);
+        log.info("Agent 会话已清除（含 Redis 记忆）: {}", sessionId);
     }
 }
